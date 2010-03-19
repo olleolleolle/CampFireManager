@@ -1,0 +1,18 @@
+[gammu]
+port = /dev/ttyUSB0
+Connection = at19200
+
+[smsd]
+PhoneID = Gammu-ID-String
+CommTimeout = 30
+DeliveryReport = sms
+
+service = mysql
+user = gammu_smsd
+password = gammu_smsd
+pc = localhost
+database = gammu_smsd
+
+LogFormat = textall
+logfile = stdout
+debuglevel = 255
