@@ -1,0 +1,6 @@
+This is version 2.1.3 of the JanRain OpenID library from http://openidenabled.com/php-openid/
+
+I have applied the following patches:
+  http://trac.openidenabled.com/trac/ticket/356
+  
+I have copied the "common.php" file from examples/consumer/common.php to the Auth directory.
