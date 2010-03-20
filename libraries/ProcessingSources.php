@@ -18,7 +18,7 @@ abstract class ProcessingSources extends GenericBaseClass {
   abstract function sendMessages($message='', $service='', $destination='');
 
   function getStatus() {
-    $this->doDebug("getStatus()\r\n");
+    $this->doDebug("getStatus()");
     return array();
   }
 }

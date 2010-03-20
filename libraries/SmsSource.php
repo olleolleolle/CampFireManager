@@ -16,7 +16,7 @@ require_once($base_dir . "ProcessingSources.php");
 class SmsSource extends ProcessingSources {
   function getStatus() {return $this->qryMap('ID', 'Signal', 'phones');}
 
-  function getMessages() {
+  function getMessages($null='') {
     $this->doDebug("getMessages(); (phones)");
     $msgs=array();
     $UDH=array();

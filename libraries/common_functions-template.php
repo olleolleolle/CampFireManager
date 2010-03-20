@@ -18,8 +18,10 @@ if(!isset($Camp_DB)) {die("You need to bring in the class which handles the data
 $times=$Camp_DB->getTimes();
 $rooms=$Camp_DB->getRooms();
 
-$column_widths=100/count($times);
-$row_heights=100/(count($rooms)+1);
+if(count($times)>0 and count($rooms)>0) {
+  $column_widths=100/count($times);
+  $row_heights=100/(count($rooms)+1);
+}
 
 // This handles all the template information
 
@@ -68,7 +70,7 @@ tr.inner {vertical-align:middle; text-align:center;}
 ";
 
 function renderHelp($class_pointer, $showWeb=FALSE, $marquee='') {
-  $class_pointer->doDebug("renderHelp();\r\n");
+  $class_pointer->doDebug("renderHelp();");
   $display_commands="Identify with this service by sending 
 ".                  "<b>I &lt;your name&gt; [email:your@email.address] [http://your.web.site]</b>
 ".                  "(there are more options for identification by going to the website)
@@ -81,7 +83,7 @@ function renderHelp($class_pointer, $showWeb=FALSE, $marquee='') {
 ".                  "Statements surrounded with &lt;&gt; are mandatory options, those statements surrounded with [] are optional.
 ".                  "These commands should be sent to your preferred ";
   $contact_methods=$class_pointer->getAllConnectionMethods();
-  $class_pointer->doDebug("contact_methods: " . var_export($contact_methods, TRUE) . "\r\n", 2);
+  $class_pointer->doDebug("contact_methods: " . var_export($contact_methods, TRUE) . "", 2);
   if($contact_methods['tel']!='') {$display_commands.="mobile service";}
   if($contact_methods['tel']!='' AND $contact_methods['omb']!='') {$display_commands.=" or ";}
   if($contact_methods['omb']!='') {$display_commands.="microblogging service";}

@@ -19,14 +19,14 @@ set_time_limit(0);
 $__campfire=array();
 $__phone=TRUE;
 
-$debug=1;
+$debug=2;
 
 // Connect to the databases
 require_once("db.php");
 $MBlog_Accounts=$Camp_DB->getMicroBloggingAccounts();
 
 $sources=array();
-$sources['Phone']=new SmsSource($db_Phone['host'], $db_Phone['user'], $db_Phone['pass'], $db_Phone['base'], $debug);
+$sources['Phone']=new SmsSource($db_Phone['host'], $db_Phone['user'], $db_Phone['pass'], $db_Phone['base'], '', $debug);
 if(is_array($MBlog_Accounts) and count($MBlog_Accounts)>0) {
   foreach($MBlog_Accounts as $intMbID=>$MBlog_Account) {
     $strApiType='statusnet';
@@ -45,20 +45,22 @@ while(true) {
     $Camp_DB->doDebug("Processing source $source_id : " . print_r($source, TRUE), 2);
     $source_status=$source->getStatus();
     foreach($source_status as $service=>$status) {$Camp_DB->updatePhoneData($service, $status);}
-    if($source_id=='Phone') {
-      $msgs=array_merge($msgs, $source->getMessages());
-    } else {
+    if($source_id>0) {
       $high_id=$Camp_DB->getLastMbUpdate($source_id);
       $old_high_id=$high_id;
-      $got_msgs=$source->getMessages($high_id);
-      $Camp_DB->doDebug("Got messages: " . print_r($got_msgs, TRUE), 2);
-      if(count($got_msgs)>0) {
-        foreach($got_msgs as $intMsgID=>$msg) {
-          $msg['omb_ac']=$source_id;
+    } else {$high_id=0; $old_high_id=0;}
+    $got_msgs=$source->getMessages($high_id);
+    $source->doDebug("Got messages: " . print_r($got_msgs, TRUE), 2);
+    if(count($got_msgs)>0) {
+      foreach($got_msgs as $intMsgID=>$msg) {
+        $msgs[]=$msg;
+        if($source_id>0) {
+          $msg['strDefaultReply']=$source_id;
           if($msg['id']>$high_id) {$high_id=$msg['id'];}
-          $msgs[]=$msg;
         }
       }
+    }
+    if($source_id>0) {
       if($high_id!=$old_high_id) {$Camp_DB->setLastMbUpdate($source_id, $high_id);}
     }
   }

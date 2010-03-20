@@ -50,12 +50,12 @@ class Camp_DB_Test extends Camp_DB {
         break;
       }
     }
-    $this->doDebug("getNowAndNextTime('$offset'); (returns now: $now, next: $next)\r\n");
+    $this->doDebug("getNowAndNextTime('$offset'); (returns now: $now, next: $next)");
     return(array('now'=>$now, 'next'=>$next));
   }
 
   function getMe($me=array()) {
-    $this->doDebug("getMe(" . print_r($me, TRUE) . ");\r\n");
+    $this->doDebug("getMe(" . print_r($me, TRUE) . ");");
     $this->intPersonID=1;
     $this->strName='Test User';
     $this->isAdmin=0;
@@ -63,14 +63,14 @@ class Camp_DB_Test extends Camp_DB {
   }
 
   function _changeMe($intPersonID) { // For mass loading and unloading - simulates multiple connections
-    $this->doDebug("_changeMe('$intPersonID');\r\n");
+    $this->doDebug("_changeMe('$intPersonID');");
     $this->intPersonID=$intPersonID;
     $this->strName='Test Attendee ' . $intPersonID;
     $this->isAdmin=0;
   }
 
   function getMicroBloggingAccounts() {
-    $this->doDebug("getMicroBloggingAccounts();\r\n");
+    $this->doDebug("getMicroBloggingAccounts();");
     return(array(1=>array('intMbID'=>1,
                           'strAccount'=>'testuser',
                           'strApiBase'=>'http://identi.ca/api',
@@ -78,7 +78,7 @@ class Camp_DB_Test extends Camp_DB {
   }
 
   function getPhones() {
-    $this->doDebug("getPhones();\r\n");
+    $this->doDebug("getPhones();");
     return(array(1=>array('intPhoneID'=>1,
                           'strPhone'=>'Test Phone Co.',
                           'strNumber'=>'07777777777',
@@ -87,7 +87,7 @@ class Camp_DB_Test extends Camp_DB {
   }
 
   function getConfig() {
-    $this->doDebug("getConfig();\r\n");
+    $this->doDebug("getConfig();");
     return(array('lunch'=>'0',
                  'website'=>'http://Camp.Fire.Manager',
                  'event_title'=>'Test event',
@@ -95,12 +95,12 @@ class Camp_DB_Test extends Camp_DB {
   }
 
   function generateNewAdminKey() {
-    $this->doDebug("generateNewAdminKey();\r\n");
+    $this->doDebug("generateNewAdminKey();");
     $this->config['adminkey']=genRandStr(10, 20);
   }
 
   function getPeople() {
-    $this->doDebug("getPeople();\r\n");
+    $this->doDebug("getPeople();");
     return(array(1=>array('intPersonID'=>1,
                           'strPhoneNumber'=>'+441234567890',
                           'strName'=>'Test User',
@@ -113,7 +113,7 @@ class Camp_DB_Test extends Camp_DB {
   }
 
   function getPerson($s=array()) {
-    $this->doDebug("getPerson(" . print_r($s, TRUE) . ");\r\n");
+    $this->doDebug("getPerson(" . print_r($s, TRUE) . ");");
     if(count($s)==0) {return FALSE;}
     $w='';
     $people=$this->getPeople();
@@ -124,7 +124,7 @@ class Camp_DB_Test extends Camp_DB {
   }
 
   function getRooms() {
-    $this->doDebug("getRooms();\r\n");
+    $this->doDebug("getRooms();");
     return(array(1=>array('intRoomID'=>1,
                           'strRoom'=>'Room 1',
                           'intCapacity'=>100),
@@ -137,18 +137,18 @@ class Camp_DB_Test extends Camp_DB {
   }
 
   function getTimes() {
-    $this->doDebug("getTimes();\r\n");
+    $this->doDebug("getTimes();");
     return(array(1=>'09:00-09:45',
                  2=>'10:00-10:45'));
   }
 
   function getTalks() {
-    $this->doDebug("getTalks();\r\n");
+    $this->doDebug("getTalks();");
     return $this->_talks;
   }
 
   protected function _createTalk($intTimeID, $intRoomID, $intPersonID, $strTalkTitle, $boolFixed, $intLength) {
-    $this->doDebug("_createTalk('$intTimeID', '$intRoomID', '$intPersonID', '$strTalkTitle', '$boolFixed', '$intLength');\r\n");
+    $this->doDebug("_createTalk('$intTimeID', '$intRoomID', '$intPersonID', '$strTalkTitle', '$boolFixed', '$intLength');");
     $this_talk=$this->getInsertID()+1;
     $this->_talks[$this_talk]=array('intTalkID'=>$this_talk,
                           'intTimeID'=>$intTimeID,
@@ -161,12 +161,12 @@ class Camp_DB_Test extends Camp_DB {
   }
 
   protected function _editTalk($intTalkID, $strTalkTitle) {
-    $this->doDebug("_editTalk('$intTalkID', '$strTalkTitle');\r\n");
+    $this->doDebug("_editTalk('$intTalkID', '$strTalkTitle');");
     $this->_talks[$intTalkID]['strTalkTitle']=$strTalkTitle;
   }
 
   protected function _deleteTalk($intTalkID) {
-    $this->doDebug("_deleteTalk('$intTalkID');\r\n");
+    $this->doDebug("_deleteTalk('$intTalkID');");
     unset($this->_talks[$intTalkID]);
     foreach($this->_attendees as $intAttendID=>$attendee) {
       if($attendee['intTalkID']==$intTalkID) {$unsetters[]=$intAttendID;}
@@ -175,7 +175,7 @@ class Camp_DB_Test extends Camp_DB {
   }
 
   function getAttendeesCount() {
-    $this->doDebug("getAttendeesCount();\r\n");
+    $this->doDebug("getAttendeesCount();");
     foreach($this->_attendees as $attendee) {
       $return[$attendee['intTalkID']]++;
     }
@@ -183,13 +183,13 @@ class Camp_DB_Test extends Camp_DB {
   }
 
   function getAttendees() {
-    $this->doDebug("getAttendees();\r\n");
+    $this->doDebug("getAttendees();");
     return $this->_attendees;
   }
 
   function getTalksIAmAttending() {
     $return=array();
-    $this->doDebug("getTalksIAmAttending();\r\n");
+    $this->doDebug("getTalksIAmAttending();");
     foreach($this->_attendees as $attendee) {
       if($attendee['intPersonID']==$this->intPersonID) {$return[]=$attendee['intTalkID'];}
     }
@@ -197,7 +197,7 @@ class Camp_DB_Test extends Camp_DB {
   }
 
   protected function _attendTalk($intTalkID) {
-    $this->doDebug("_attendTalk('$intTalkID');\r\n");
+    $this->doDebug("_attendTalk('$intTalkID');");
     $mytalks=$this->getTalksIAmAttending();
     if(!in_array($intTalkID, $mytalks)) {
       $this->_attendees[]=array('intTalkID'=>$intTalkID, 'intPersonID'=>$this->intPersonID);
@@ -205,7 +205,7 @@ class Camp_DB_Test extends Camp_DB {
   }
 
   protected function _declineTalk($intTalkID) {
-    $this->doDebug("_declineTalk('$intTalkID');\r\n");
+    $this->doDebug("_declineTalk('$intTalkID');");
     foreach($this->_attendees as $intAttendID=>$attendee) {
       if($attendee['intPersonID']==$this->intPersonID AND $attendee['intTalkID']==$intTalkID) {
         $unsetters[]=$intAttendID;
@@ -217,24 +217,24 @@ class Camp_DB_Test extends Camp_DB {
   }
 
   protected function _moveTalkRoom($intTalkID, $intRoomID) {
-    $this->doDebug("_moveTalkRoom('$intTalkID', '$intRoomID');\r\n");
+    $this->doDebug("_moveTalkRoom('$intTalkID', '$intRoomID');");
     $this->_talks[$intTalkID]['intRoomID']=$intRoomID;
   }
 
   protected function _setRoom($intTalkID, $intRoomID) {
-    $this->doDebug("_setRoom(intTalkID=>'$intTalkID', intRoomID=>'$intRoomID');\r\n");
+    $this->doDebug("_setRoom(intTalkID=>'$intTalkID', intRoomID=>'$intRoomID');");
     $this->_talks[$intTalkID]['intRoomID']=$intRoomID;
   }
 
   function getPresenters() {
-    $this->doDebug("getPresenters();\r\n");
+    $this->doDebug("getPresenters();");
     return(array(1=>array('intPersonID'=>1,
                           'strName'=>'Test User',
                           'strContactInfo'=>'mailto:test@example.com http://example.com/~test twitter:testuser')));
   }
 
   function getScreens($s='') {
-    $this->doDebug("getScreens('$s');\r\n");
+    $this->doDebug("getScreens('$s');");
     return(array(1=>'Test Screen'));
   }
 
@@ -250,7 +250,7 @@ class Camp_DB_Test extends Camp_DB {
   }
 
   function getDirections($s='') {
-    $this->doDebug("getDirections('$s');\r\n");
+    $this->doDebug("getDirections('$s');");
     return(array(1=>array('intDirectionID'=>1,
                           'intScreenID'=>1,
                           'intDestRoomID'=>1,
@@ -262,7 +262,7 @@ class Camp_DB_Test extends Camp_DB {
   }
 
   function boolUpdateOrInsertSql($sql='') {
-    $this->doDebug("boolUpdateOrInsertSql('$sql')\r\n");
+    $this->doDebug("boolUpdateOrInsertSql('$sql')");
     if($sql!='') {return TRUE;} else {return FALSE;}
   }
 
@@ -273,7 +273,7 @@ class Camp_DB_Test extends Camp_DB {
     foreach($this->_talks as $intTalkID=>$talk) {
       if($intTalkID>$maxTalkID) {$maxTalkID=$intTalkID;}
     }
-    $this->doDebug("getInsertID(); (returns $maxTalkID)\r\n");
+    $this->doDebug("getInsertID(); (returns $maxTalkID)");
     return($maxTalkID);
   }
 }

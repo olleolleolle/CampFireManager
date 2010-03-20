@@ -43,7 +43,15 @@ function ajaxPopulateTable() {
   global $Camp_DB, $includeCountData, $includeProposeLink, $sms_limit, $baseurl;
   
   $return=new xajaxResponse();
-  $return->assign("mainbody", "innerHTML", $Camp_DB->getTimetableTemplate(FALSE, FALSE));
+  session_start();
+  if(isset($_SESSION['openid'])) {
+    $counts=TRUE;
+    $propose=FALSE;
+  } else {
+    $counts=FALSE; 
+    $propose=TRUE;
+  }
+  $return->assign("mainbody", "innerHTML", $Camp_DB->getTimetableTemplate($propose, $counts));
   $return->assign("sms_list", "innerHTML", $Camp_DB->getSmsTemplate($sms_limit));
 
   return $return;

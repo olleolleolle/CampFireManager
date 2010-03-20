@@ -105,6 +105,10 @@ class Camp_DB extends GenericBaseClass {
       $me['phone']=$this->escape($me['phone']);
       $me['phone_nick']="Someone with a mobile number ending " . substr($me['number'], -4);
       $where="strPhoneNumber='{$me['number']}'";
+      if(strtoupper(substr($me['text'], 0, 2))=="O ") {
+        $commands=explode(" ", $msg['text']);
+        $where.=" OR strAuthString='{$commands[1]}'";
+      }
     } else {$me['number']='';}
     
     // Check for a Microblog Account
@@ -116,6 +120,10 @@ class Camp_DB extends GenericBaseClass {
         $me['microblog_name']="A MicroBlogging user at " . $this->escape(parse_url($me['microblog_account'], PHP_URL_HOST));
       }
       $where="strMicroBlog='{$me['microblog_account']}'";
+      if(strtoupper(substr($me['text'], 0, 2))=="O ") {
+        $commands=explode(" ", $msg['text']);
+        $where=" OR strAuthString='{$commands[1]}'";
+      }
     }
 
     // Check for an OpenID Account
@@ -141,7 +149,12 @@ class Camp_DB extends GenericBaseClass {
         // User exists
         foreach($people as $intPersonID=>$strName) {}
         // Specify where we got the last message from incase we want to reply
-        if(isset($me['phone'])) {$this->boolUpdateOrInsertSql("UPDATE {$this->prefix}people SET strDefaultReply='{$me['phone']}' WHERE intPersonID='$intPersonID'");}
+        $set='';
+        if(isset($me['phone'])) {$set.="strDefaultReply='{$me['phone']}'";}
+        if(isset($me['phone_number'])) {if($set!='') {$set.=", ";} $set.="strPhoneNumber='{$me['phone_number']}'"; }
+        if(isset($me['microblog_account'])) {if($set!='') {$set.=", ";} $set.="strMicroBlog='{$me['microblog_account']}'"; }
+        if(isset($me['microblog_name']) AND $strName=='') {if($set!='') {$set.=", ";} $set.="strName='{$me['microblog_name']}'"; }
+        $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}people SET $set WHERE intPersonID='$intPersonID'");
       } else {
         // User doesn't exist
         // Generate an authString for them
@@ -154,11 +167,12 @@ class Camp_DB extends GenericBaseClass {
         }
         // Now add it to the database
         if($me['number']!='') {$this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}people (strPhoneNumber, strName, strDefaultReply, strAuthString) VALUES ('{$me['number']}', '{$me['phone_nick']}', '{$me['phone']}', '$authString')");}
-        if($me['microblog_account']!='') {$this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}people (strMicroBlog, strName, strAuthString, strDefaultReply) VALUES ('{$me['microblog_account']}', '{$me['microblog_name']}', '$authString', 'mb_{$me['omb_ac']}')");}
+        if($me['microblog_account']!='') {$this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}people (strMicroBlog, strName, strAuthString, strDefaultReply) VALUES ('{$me['microblog_account']}', '{$me['microblog_name']}', '$authString', '{$me['strDefaultReply']}')");}
         if($me['OpenID']!='') {$this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}people (strOpenID, strName, strContactInfo, strAuthString) VALUES ('{$me['OpenID']}', '{$me['OpenID_Name']}', '{$me['OpenID_Mail']}', '$authString')");}
         // And return the user IDs
         $people=$this->qryMap('intPersonID', 'strName', "{$this->prefix}people WHERE $where");
         foreach($people as $intPersonID=>$strName) {}
+        $this->intPersonID=$intPersonID;
         $this->sendMessage("Welcome to CampFireManager for {$this->config['event_title']}. Your authorization string for merging this account with other comms systems is: $authString.");
       }
       $checkIsAdmin=$this->qryMap('intPersonID', 'boolIsAdmin', "{$this->prefix}people WHERE intPersonID='$intPersonID'");

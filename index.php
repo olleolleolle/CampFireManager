@@ -30,6 +30,8 @@ $contact_fields=array('mailto', 'twitter', 'linkedin', 'identica', 'statusnet', 
   <title><?php echo $Camp_DB->config['event_title']; ?></title>
   <script type="text/javascript" src="external/jquery-1.4.1.min.js"></script>
   <script type="text/javascript" src="external/jquery.marquee.js"></script>
+  <?php $xajax->printJavascript(); ?>
+
   <script type="text/javascript">
     $(document).ready(function(){
       $('.Show').click(function() {
@@ -43,6 +45,10 @@ $contact_fields=array('mailto', 'twitter', 'linkedin', 'identica', 'statusnet', 
         event.preventDefault();
       });
     });
+    function update() {
+      xajax_ajaxPopulateTable();
+      setTimeout("update()", 10000);
+    }
   </script>
   </head>
   <style type="text/css">
@@ -141,9 +147,10 @@ if(!isset($_SESSION['openid'])) {
   echo "<div class=\"MenuBar\">\r\n<a href=\"$baseurl\">Reload Calendar</a> |\r\n <a href=\"$baseurl?state=logout\">Log out</a> |\r\n <a href=\"$baseurl?state=O\">Add other access methods</a> |\r\n <a href=\"$baseurl?state=I\">Amend contact details</a>";
   if($Camp_DB->checkAdmin()!=0) {echo "|\r\n <a href=\"{$baseurl}admin.php\">Modify config values</a>";}
   echo "\r\n</div>\r\n";
-
-  echo $Camp_DB->getTimetableTemplate(FALSE, TRUE);
-  echo $Camp_DB->getSmsTemplate(50);
+  echo '  <div id="mainbody" class="mainbody"></div>
+  <div id="sms_list" class="sms_list"></div>
+  <script type="text/javascript">update();</script>';
 }
-
 ?>
+</body>
+</html>

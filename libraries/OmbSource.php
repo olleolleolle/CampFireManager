@@ -19,7 +19,7 @@ class OmbSource extends ProcessingSources {
   protected $_last_run=0;
 
   function __construct($strUsername, $strPassword, $strBaseApi='http://identi.ca/api', $strApiType='statusnet', $debug=0) {
-    $this->_intDebug=$debug;
+    $this->setDebug($debug);
     $this->doDebug("New OmbSource($strUsername, $strPassword, $strBaseApi, $strApiType, $debug)");
     $this->_api=new GetTwitterAPI(array('strApiBase'=>$strBaseApi, 'strApiType'=>$strApiType, 'strUsername'=>$strUsername, 'strPassword'=>$strPassword, 'boolDebug'=>$debug));
   }
