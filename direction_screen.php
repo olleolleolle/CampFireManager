@@ -20,6 +20,8 @@ require_once("{$base_dir}common_functions-template.php");
 // Add xajax script
 require_once("{$base_dir}common_xajax.php");
 
+$directions=array("UL", "U", "UR", "L", "C", "R", "DL", "D", "DR");
+
 // We might need to move a room's direction, or set it initially.
 if(isset($_GET['setroomdir']) AND $_GET['roomno']+0>0 AND array_search($_GET['roomdir'], $directions)!==FALSE) {$Camp_DB->setDirections($_GET['roomno'], $_GET['roomdir']);}
 ?><html>

@@ -1091,6 +1091,12 @@ class Camp_DB extends GenericBaseClass {
               } else {
                 $d[$direction].="      <span class=\"Direction_Header\">Rooms defined in this direction:</span><br />\r\n";
                 foreach(array_keys($room_directions, $direction) as $room_id) {$d[$direction].="      <span class=\"Room_In_Direction\">{$this->rooms[$room_id]['strRoom']}</span><br />\r\n";}
+                $d[$direction].="      <span class=\"Direction_Header\">Rooms still to be defined:</span><br />\r\n";
+                foreach($this->rooms as $room_id=>$room) {
+                  if(!isset($room_directions[$room_id])) {
+                    $d[$direction].="      <span class=\"Room_to_define\"><a href=\"?setroomdir=true&roomno=$room_id&roomdir=$direction\">{$this->rooms[$room_id]['strRoom']}</a></span><br />\r\n";
+                  }
+                }
               }
             }
           } else {
