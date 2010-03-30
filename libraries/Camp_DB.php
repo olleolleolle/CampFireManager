@@ -653,6 +653,7 @@ class Camp_DB extends GenericBaseClass {
     }
 
     foreach($arrTalks as $intTalkID=>$arrTalk) {
+      $arrTalks[$intTalkID]['strTalkTitle']=stripslashes($arrTalk['strTalkTitle']);
       if(isset($arrAttendanceByTalks[$intTalkID])) {
         $arrTalks[$intTalkID]['intCount']=$arrAttendanceByTalks[$intTalkID];
       } else {

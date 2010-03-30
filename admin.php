@@ -25,6 +25,7 @@ if($Camp_DB->getAdmins()==0) { // If there's no-one here yet, you get it by defa
   $config_fields=array( 'lunch'=>'Lunchtime',
                         'FixRoomOffset'=>'Relative to the start time of a session, at what point is the room allocated to a talk fixed?',
                         'UTCOffset'=>'The UTC offset for the timezone, e.g. +00:00 for GMT or -08:00 for Pacific Standard Time.',
+                        'timezone_name'=>'This is the name of your timezone (e.g. Europe/London)',
                         'AboutTheEvent'=>'Please provide some details about the content of your event.',
                         'website'=>"The public URL of this site. Leave blank if you don't want public access.",
                         'event_title'=>'What is the title of your event?');
