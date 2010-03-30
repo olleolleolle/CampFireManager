@@ -11,10 +11,12 @@
  * http://code.google.com/p/campfiremanager/
  ******************************************************/
 
-session_start(); 
+session_start();
+if(isset($_SESSION['redirect'])) {unset($_SESSION['redirect']);}
 require_once("db.php");
 // You're only allowed here if you've already logged in
 if(!isset($_SESSION['openid'])) {
+  $_SESSION['redirect']='admin.php';
   header("Location: $baseurl");
 } else {
   $Camp_DB->getMe(array('OpenID'=>$_SESSION['openid'], 'OpenID_Name'=>$_SESSION['name'], 'OpenID_Mail'=>$_SESSION['email']));

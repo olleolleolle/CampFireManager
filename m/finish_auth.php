@@ -1,1 +1,0 @@
-../finish_auth.php

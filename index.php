@@ -12,6 +12,7 @@
  ******************************************************/
 
 session_start(); 
+if(isset($_SESSION['openid']) and isset($_SESSION['redirect'])) {header("Location: " . $_SESSION['redirect']);}
 if(file_exists("libraries/GenericBaseClass.php")) {$base_dir='libraries/';} else {$base_dir='';}
 require_once("db.php");
 require_once("{$base_dir}common_functions-template.php");

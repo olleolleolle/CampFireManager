@@ -1,5 +1,10 @@
 <?php 
 session_start();
+if(isset($_SESSION['redirect'])) {unset($_SESSION['redirect']);}
+if(!isset($_SESSION['openid']) and isset($_GET['login'])) {
+  $_SESSION['redirect']='m';
+  header("Location: ..");
+}
 $base_dir="../libraries/";
 require_once("../db.php"); 
 ?>
@@ -50,29 +55,8 @@ if($is_lunch==1) {$next_talks="Lunch<br />" . $next_talks;}
 
 if($now_talks!='') {echo "Talks on now: (started at " . $Camp_DB->arrTimeEndPoints[$now]['s'] . "):<br />$now_talks";}
 if($next_talks!='') {echo "Talks on next (starts at " . $Camp_DB->arrTimeEndPoints[$next]['s'] . "):<br />$next_talks";}
-if(isset($_REQUEST['state'])) {
-  switch($_REQUEST['state']) {
-    case 'logout':
-      $err="You have successfully logged out. If you want to act further, please try again.<br />";
-      foreach($_SESSION as $key=>$val) {unset($_SESSION[$key]);} 
-      break; 
-    case 'fail':
-      $err="There was a problem logging you in with these details. Please try again.<br />";
-      foreach($_SESSION as $key=>$val) {unset($_SESSION[$key]);} 
-      break; 
-    case 'cancel':
-      $err="You clicked on cancel. Please try again.<br />";
-      foreach($_SESSION as $key=>$val) {unset($_SESSION[$key]);} 
-      break;
-  } 
-}
-
 if(!isset($_SESSION['openid'])) {
-  echo "<h1>Login to CampFireManager for {$Camp_DB->config['event_title']}</h1>";
-  if(isset($err)) {echo '<div id="verify-form" class="error">'.$err.'</div>';}
-  if(isset($_GET['reason'])) {echo '<div id="verify-form" class="error">Reason: ' . $_GET['reason'] . '</div>';}
-  echo '<div id="verify-form"><form method="get" action="try_auth.php"> Please enter your OpenID provider, or just click "Verify" to use your Google account: <input type="hidden" name="action" value="verify" /> <input type="text" name="openid_identifier" size="50" value="https://www.google.com/accounts/o8/id" /><input type="submit" value="Verify" /></form></div>';
-  echo "<div class=\"EventDetails\">{$Camp_DB->config['AboutTheEvent']}</div>";
+  echo "<a href=\"?login\">Login to CampFireManager</a>";
 } else {
   $Camp_DB->getMe(array('OpenID'=>$_SESSION['openid'], 'OpenID_Name'=>$_SESSION['name'], 'OpenID_Mail'=>$_SESSION['email']));
   echo "<a href=\"$baseurl?list\">List all unfinished talks</a><br />"; 
