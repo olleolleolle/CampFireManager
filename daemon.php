@@ -37,7 +37,7 @@ if(is_array($MBlog_Accounts) and count($MBlog_Accounts)>0) {
 
 while(true) {
   sleep(5);
-  $Camp_DB->fixRooms($camp);
+  $Camp_DB->fixRooms();
 
   $msgs=array();
 

@@ -128,6 +128,7 @@ class GetTwitterAPI extends GetBaseAPI {
   }
 
   function get_inbox($since_id=0) {
+    $return=array();
     $this->doDebug("get_inbox($since_id)");
     $timeline=$this->get_data($this->cx_data['strApiBase'] . "/direct_messages.json?since_id={$since_id}&count=" . $this->cx_data['count'], $this->cx_data['strUsername'] . ":" . $this->cx_data['strPassword']);
     if($timeline==FALSE) {return FALSE;} else {
@@ -231,6 +232,7 @@ abstract class GetBaseAPI extends GenericBaseClass {
     curl_setopt($curl, CURLOPT_FAILONERROR, true);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+    if($this->_intDebug>2) {curl_setopt($curl, CURLOPT_VERBOSE, true);}
     curl_setopt($curl, CURLOPT_MAXREDIRS, 10);
     $data=curl_exec($curl);
     curl_close($curl);
@@ -253,6 +255,7 @@ abstract class GetBaseAPI extends GenericBaseClass {
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
     curl_setopt($curl, CURLOPT_MAXREDIRS, 10);
+    if($this->_intDebug>2) {curl_setopt($curl, CURLOPT_VERBOSE, true);}
     curl_setopt($curl, CURLOPT_POST, 1);
     curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
     $data=curl_exec($curl);
@@ -262,6 +265,7 @@ abstract class GetBaseAPI extends GenericBaseClass {
   }
 
   function recastAsArray($objArray) {
+    if(!is_object($objArray) and !is_array($objArray)) {$return=$objArray;} else {$return=array();}
     foreach($objArray as $key=>$obj) {
       if(is_object($obj)) {$return[$key]=(array) $this->recastAsArray($obj);} else {$return[$key]=$obj;}
     }

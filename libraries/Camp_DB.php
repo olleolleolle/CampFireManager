@@ -52,8 +52,8 @@ class Camp_DB extends GenericBaseClass {
     $this->times=$this->getTimes();
     $this->rooms=$this->getRooms();
     $this->config=$this->getConfig();
-    if($this->config['event_start']=='') {$this->config['event_start']=$this->today;}
-    if($this->config['event_end']=='') {$this->config['event_end']=$this->today;}
+    if(!isset($this->config['event_start']) OR $this->config['event_start']=='') {$this->config['event_start']=$this->today;}
+    if(!isset($this->config['event_end']) OR $this->config['event_end']=='') {$this->config['event_end']=$this->today;}
     $now_and_next=$this->getNowAndNextTime();
     $this->now_time=$now_and_next['now'];
     $this->next_time=$now_and_next['next'];
@@ -173,7 +173,7 @@ class Camp_DB extends GenericBaseClass {
         $people=$this->qryMap('intPersonID', 'strName', "{$this->prefix}people WHERE $where");
         foreach($people as $intPersonID=>$strName) {}
         $this->intPersonID=$intPersonID;
-        $this->sendMessage("Welcome to CampFireManager for {$this->config['event_title']}. Your authorization string for merging this account with other comms systems is: $authString.");
+        $this->sendMessage("Welcome to {$this->config['event_title']}. Your authorization string for this system is: $authString.");
       }
       $checkIsAdmin=$this->qryMap('intPersonID', 'boolIsAdmin', "{$this->prefix}people WHERE intPersonID='$intPersonID'");
       $this->intPersonID=$intPersonID;
@@ -194,7 +194,7 @@ class Camp_DB extends GenericBaseClass {
     if($me['strDefaultReply']!='' AND isset($sources[$me['strDefaultReply']])) {
       $sources[$me['strDefaultReply']]->sendMessages($strMessage);
     } elseif($me['strDefaultReply']!='') {
-      $sources[$me['strDefaultReply']]->sendMessages($strMessage, $me['strDefaultReply'], $me['strPhoneNumber']);
+      $sources['Phone']->sendMessages($strMessage, $me['strDefaultReply'], $me['strPhoneNumber']);
     }
   }
 

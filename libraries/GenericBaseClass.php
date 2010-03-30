@@ -30,7 +30,7 @@ abstract class GenericBaseClass {
   function qryArray($sql, $index='') {
     $this->doDebug("SQL: ($index) # $sql # ");
     $query=mysql_query($sql, $this->resource);
-    if(mysql_err_no>0 OR $query===FALSE) {
+    if(mysql_errno($this->resource)>0 OR $query===FALSE) {
       $this->doDebug("ERR: " . mysql_error($this->resource) . "");
       return FALSE;
     } 
@@ -49,7 +49,7 @@ abstract class GenericBaseClass {
     if($limit!='') {$sql.=" $limit";}
     $this->doDebug("SQL: # $sql # ");
     $query=mysql_query($sql, $this->resource);
-    if(mysql_err_no!=0) {
+    if(mysql_errno($this->resource)!=0) {
       $this->doDebug("ERR: " . mysql_error($this->resource) . "");
       return FALSE;
     }

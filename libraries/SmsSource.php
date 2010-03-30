@@ -52,11 +52,13 @@ class SmsSource extends ProcessingSources {
 
   function sendMessages($strMessage='', $strPhone='', $strPhoneNumber='') {
     $this->doDebug("sendMessages('$strMessage', '$strPhone', '$strPhoneNumber');");
-    $arrMessageChunks=str_split($this->escape($strMessage), 160);
+    $arrMessageChunks=str_split($this->escape(stripslashes($strMessage)), 160);
+    $this->doDebug("Chunked Message Parts: " . var_dump($arrMessageChunks, true), 2);
     if(count($arrMessageChunks)==1) {
-      $this->boolUpdateOrInsertSql("INSERT INTO outbox (DestinationNumber, TextDecoded, CreatorID, Coding, SenderID) VALUES ('$strPhoneNumber', '" . $this->escape($strMessage) . "', 'CampFireManager','Default_No_Compression', '$strPhone')");
+      $this->boolUpdateOrInsertSql("INSERT INTO outbox (DestinationNumber, TextDecoded, CreatorID, Coding, SenderID) VALUES ('" . $this->escape(stripslashes($strPhoneNumber)) . "', '" . $this->escape(stripslashes($strMessage)) . "', 'CampFireManager','Default_No_Compression', '" . $this->escape(stripslashes($strPhone)) . "')");
     } else {
       foreach($arrMessageChunks as $chunkid=>$chunk) {
+        $chunk_id=$chunkid+1;
         $UDH=str_pad(dechex(rand(0, 255)), 2, "0");
         $UDH_Parts=str_pad(dechex(count($arrMessageChunks)), 2, "0");
         $UDH_This_Part=str_pad(dechex($chunkid+1), 2, "0");
@@ -70,25 +72,23 @@ class SmsSource extends ProcessingSources {
                                                             SenderID
                                         ) VALUES ('CampFireManager', 
                                                   'true', 
-                                                  '$strPhoneNumber', 
+                                                  '" . $this->escape(stripslashes($strPhoneNumber)) . "', 
                                                   '050003{$UDH}{$UDH_Parts}{$UDH_This_Part}', 
-                                                  '$chunk', 
+                                                  '" . $this->escape(stripslashes($chunk)) . "', 
                                                   'Default_No_Compression',
-                                                  '$strPhone')");
+                                                  '" . $this->escape(stripslashes($strPhone)) . "')");
           $mp_id=$this->getInsertID();
         } else {
           $this->boolUpdateOrInsertSql("INSERT INTO outbox_multipart (SequencePosition,
                                                                       UDH,
                                                                       TextDecoded,
                                                                       ID,
-                                                                      Coding, 
-                                                                      SenderID
-                                        ) VALUES ('" . $chunkid+1 . "', 
+                                                                      Coding
+                                        ) VALUES ('$chunk_id', 
                                                   '050003{$UDH}{$UDH_Parts}{$UDH_This_Part}', 
-                                                  '$chunk',
-                                                  '$mp_id'.
-                                                  'Default_No_Compression',
-                                                  '$strPhone')");
+                                                  '" . $this->escape(stripslashes($chunk)) . "',
+                                                  '$mp_id',
+                                                  'Default_No_Compression')");
         }
       }
     }
