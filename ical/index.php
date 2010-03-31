@@ -1,5 +1,3 @@
-
-
 <?php 
 /*******************************************************
  * CampFireManager
@@ -13,8 +11,8 @@
  * http://code.google.com/p/campfiremanager/
  ******************************************************/
 
-if(file_exists("libraries/GenericBaseClass.php")) {$base_dir='libraries/';} else {$base_dir='';}
-require_once("db.php");
+if(file_exists("../libraries/GenericBaseClass.php")) {$base_dir='../libraries/';} else {$base_dir='../';}
+require_once("{$base_dir}../db.php");
 require_once($base_dir . "../external/iCalcreator/iCalcreator.class.php");
 
 $Camp_DB->fixRooms();

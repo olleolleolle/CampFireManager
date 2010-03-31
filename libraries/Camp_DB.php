@@ -28,6 +28,8 @@ class Camp_DB extends GenericBaseClass {
   var $arrTalkSlots=array();
   var $arrTimeEndPoints=array();
 
+  var $contact_fields=array('mailto', 'twitter', 'linkedin', 'identica', 'statusnet', 'facebook', 'irc', 'http', 'https');
+
   var $times=array();
   var $rooms=array();
   var $config=array();
@@ -747,12 +749,11 @@ class Camp_DB extends GenericBaseClass {
   function getContactDetails($intPersonID=0, $asArray=FALSE) {
     if($intPersonID==0) {$intPersonID=$this->intPersonID;}
     $this->doDebug("getContactDetails('$intPersonID', '$asArray')");
-    $contact_fields=array('mailto', 'email', 'twitter', 'linkedin', 'identica', 'statusnet', 'facebook', 'irc', 'url', 'http', 'https');
     if($asArray==FALSE) {$return='';} else {$return=array();}
     $people=$this->getPerson(array('intPersonID'=>$intPersonID));
     $contact_details=explode(" ", $people[$intPersonID]['strContactInfo']);
     foreach($contact_details as $cid=>$command) {
-      foreach($contact_fields as $proto) {
+      foreach($this->contact_fields as $proto) {
         if(strpos($command, $proto)!==FALSE) {
           $proto_data=explode(':', $command);
           $real_data='';

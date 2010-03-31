@@ -93,7 +93,7 @@ function renderHelp($class_pointer, $showWeb=FALSE, $marquee='') {
   if($marquee!='') {$return="$marquee\r\n";} else {$return="<div class=\"HelpInfo\">\r\n";}
   if($contact_methods['tel']!='') {$return.="<div class=\"numberbar\"><span class=\"Label\">Phones:</span> <span class=\"Data\">{$contact_methods['tel']}</span></div>\r\n";}
   if($contact_methods['omb']!='') {$return.="<div class=\"ombbar\"><span class=\"Label\">Microblogging:</span> <span class=\"Data\">{$contact_methods['omb']}</span></div>\r\n";}
-  if($contact_methods['web']!='' AND $showWeb=TRUE) {$return.="<div class=\"webbar\"><span class=\"Label\">Website:</span> <span class=\"Data\">{$contact_methods['web']}</span></div>\r\n";}
+  if($contact_methods['web']!='' AND $showWeb=TRUE) {$return.="<div class=\"webbar\"><span class=\"Label\">Website:</span> <span class=\"Data\">{$contact_methods['web']}</span></div>\r\n<div class=\"webbar\"><span class=\"Label\">Mobile site:</span> <span class=\"Data\">{$contact_methods['web']}m/</span></div>\r\n";}
   if($marquee!='') {$return.="<div class=\"CommandInfo\">" . nl2br($display_commands) . "</div>\r\n</marquee>\r\n";} else {$return.="<div class=\"CommandInfo Header\">Command Information: <span class=\"CommandInfo Show\">Click here to expand your options</span><span class=\"CommandInfo Hide\">$display_commands</span></div>\r\n</div>\r\n";}
   return($return);
 }

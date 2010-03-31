@@ -82,8 +82,6 @@ if(!isset($_SESSION['openid'])) {
 } else {
   $Camp_DB->getMe(array('OpenID'=>$_SESSION['openid'], 'OpenID_Name'=>$_SESSION['name'], 'OpenID_Mail'=>$_SESSION['email']));
   echo "<h1 class=\"headerbar\">{$Camp_DB->config['event_title']}</h1>\r\n";
-  echo renderHelp($Camp_DB);
-
   switch($_REQUEST['state']) {
     case "O":
       $arrAuthString=$Camp_DB->getAuthStrings();
@@ -145,7 +143,7 @@ if(!isset($_SESSION['openid'])) {
       break;
   }
   $Camp_DB->refresh();
-  echo "<div class=\"MenuBar\">\r\n<a href=\"$baseurl\">Reload Calendar</a> |\r\n <a href=\"$baseurl?state=logout\">Log out</a> |\r\n <a href=\"$baseurl?state=O\">Add other access methods</a> |\r\n <a href=\"$baseurl?state=I\">Amend contact details</a>";
+  echo "<div class=\"MenuBar\">\r\n<a href=\"$baseurl?state=logout\">Log out</a> |\r\n <a href=\"$baseurl?state=O\">Add other access methods</a> |\r\n <a href=\"$baseurl?state=I\">Amend contact details</a> |\r\n <a href=\"{$baseurl}ical/\">ical</a>";
   if($Camp_DB->checkAdmin()!=0) {echo "|\r\n <a href=\"{$baseurl}admin.php\">Modify config values</a>";}
   echo "\r\n</div>\r\n";
   echo '  <div id="mainbody" class="mainbody"></div>
