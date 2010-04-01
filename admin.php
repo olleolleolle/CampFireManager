@@ -25,12 +25,14 @@ if($Camp_DB->getAdmins()==0) { // If there's no-one here yet, you get it by defa
   header("Location: $baseurl?state=Oa&AuthString={$Camp_DB->config['adminkey']}");
 } elseif($Camp_DB->checkAdmin()==1) { // Otherwise you'll only get it if you're in the admin list
   $config_fields=array( 'lunch'=>'Lunchtime',
+                        'website'=>"The public URL of this site. Leave blank if you don't want public access.",
+                        'event_title'=>'What is the title of your event?',
                         'FixRoomOffset'=>'Relative to the start time of a session, at what point is the room allocated to a talk fixed?',
                         'UTCOffset'=>'The UTC offset for the timezone, e.g. +00:00 for GMT or -08:00 for Pacific Standard Time.',
                         'timezone_name'=>'This is the name of your timezone (e.g. Europe/London)',
                         'AboutTheEvent'=>'Please provide some details about the content of your event.',
-                        'website'=>"The public URL of this site. Leave blank if you don't want public access.",
-                        'event_title'=>'What is the title of your event?');
+                        'hashtag'=>"Optional: What do you want people (including this script) to use as the hashtag for today?, including the # sign itself.");
+
   if(isset($_POST['update_config'])) {foreach($config_fields as $value=>$description) {$Camp_DB->setConfig($value, stripslashes($_POST[$value]));}}
   if(isset($_POST['update_times'])) {
     foreach($Camp_DB->times as $value=>$description) {$Camp_DB->updateTime($value, $_POST['time_' . $value]);}
@@ -58,12 +60,12 @@ if($Camp_DB->getAdmins()==0) { // If there's no-one here yet, you get it by defa
 <head>
 <title>{$Camp_DB->config['event_title']}</title>
 </head>
-<link rel="stylesheet" type="text/css" href="common_style.php" />
+<link rel=\"stylesheet\" type=\"text/css\" href=\"common_style.php\" />
 <body>
-<a href=\"$baseurl\">Back to main screen</a>
 <form method=\"post\" action=\"{$baseurl}admin.php\" class=\"WholeDay\">
 <input type=\"hidden\" name=\"update_config\" value=\"TRUE\">
 <table>
+  <tr><td><a href=\"$baseurl\" class=\"Label\">Back to main screen</a></td><td class=\"right\"><a href=\"{$baseurl}joind_in.php\" class=\"Label\">Joind.in XML file</a></td></tr>
   <tr><th colspan=\"2\">Admin Console for Config Options (empty boxes will unset those values in the database)</th></tr>
   <tr><td class=\"Label\">AdminKey</td><td class=\"Data\">{$Camp_DB->config['adminkey']}</td></tr>
   <tr><td class=\"Label\">Lunch Time</td><td class=\"Data\"><select name=\"lunch\">";

@@ -19,7 +19,7 @@ set_time_limit(0);
 $__campfire=array();
 $__phone=TRUE;
 
-$debug=2;
+$debug=1;
 
 // Connect to the databases
 require_once("db.php");
@@ -37,7 +37,34 @@ if(is_array($MBlog_Accounts) and count($MBlog_Accounts)>0) {
 
 while(true) {
   sleep(5);
-  $Camp_DB->fixRooms();
+  if($Camp_DB->fixRooms()) {
+    // fixRooms returns true if it fixed a room, thus, let's broadcast that.
+    if(isset($Camp_DB->config['FixRoomOffset'])) {$offset=$Camp_DB->config['FixRoomOffset'];} else {$offset="-15 minutes";}
+    $nowandnext_talk_time=$Camp_DB->getNowAndNextTime($offset);
+    $next_talk_time=$nowandnext_talk_time['now'];
+    $broadcast_talks=array();
+    foreach($Camp_DB->arrTalkSlots[$next_talk_time] as $fix_intRoomID=>$fix_intTalkID) {if($fix_intTalkID>0) {
+      $broadcast_talks[$fix_intTalkID]['strTalkTitle']=$Camp_DB->arrTalks[$fix_intTalkID]['strTalkTitle'];
+      $broadcast_talks[$fix_intTalkID]['strRoom']=$Camp_DB->rooms[$Camp_DB->arrTalks[$fix_intTalkID]['intRoomID']]['strRoom'];
+      $contact=getContactDetails($Camp_DB->arrTalks[$fix_intTalkID]['intPersonID'], TRUE);
+      if(isset($contact['twitter']) and $contact['twitter']!='') {
+        $broadcast_talks[$fix_intTalkID]['strPerson']='@' . $contact['twitter'];
+      } elseif(isset($contact['identica']) and $contact['identica']!='') {
+        $broadcast_talks[$fix_intTalkID]['strPerson']='@' . $contact['identica'];
+      } else {
+        $broadcast_talks[$fix_intTalkID]['strPerson']=$contact['strName'];
+      }
+    }}
+    foreach($broadcast_talks as $fix_intTalkID=>$broadcast_talk) {
+      $message_pre="Talk Fixed: ";
+      $message_post=" in {$broadcast_talk['strRoom']} by {$broadcast_talk['strPerson']} at {$Camp_DB->arrTimeEndPoints[$next_talk_time]['s']}" . $Camp_DB->config['hashtag'];
+      $title_length=140 - strlen($message_pre . $message_post);
+      $message=$message_pre . substr($broadcast_talk['strTalkTitle'], 0, $title_length) . $message_post;
+      foreach($sources as $source_id=>$source) {if($source_id>0) {
+        $source->sendMessages($message);
+      }}
+    }
+  }
 
   $msgs=array();
 

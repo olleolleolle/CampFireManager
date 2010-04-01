@@ -124,7 +124,7 @@ class Camp_DB extends GenericBaseClass {
       $where="strMicroBlog='{$me['microblog_account']}'";
       if(strtoupper(substr($me['text'], 0, 2))=="O ") {
         $commands=explode(" ", $msg['text']);
-        $where=" OR strAuthString='{$commands[1]}'";
+        $where.=" OR strAuthString='{$commands[1]}'";
       }
     }
 
@@ -876,12 +876,12 @@ class Camp_DB extends GenericBaseClass {
     $this->doDebug("fixRooms()");
     if(isset($this->config['FixRoomOffset'])) {$offset=$this->config['FixRoomOffset'];} else {$offset="-15 minutes";}
     $now_and_next=$this->getNowAndNextTime($offset);
-    $this->_fixRooms($now_and_next['now']);
+    return($this->_fixRooms($now_and_next['now']));
   }
 
   protected function _fixRooms($now_time) {
     $this->doDebug("_fixRooms()");
-    $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}talks SET boolFixed=1 WHERE intTimeID<='$now_time'");
+    return($this->boolUpdateOrInsertSql("UPDATE {$this->prefix}talks SET boolFixed=1 WHERE intTimeID<='$now_time'"));
   }
 
   protected function _setAdmin() {
@@ -1083,7 +1083,7 @@ class Camp_DB extends GenericBaseClass {
           if(count($rooms_in_direction)>0) {
             foreach(array_keys($room_directions, $direction) as $room_id) {
               if($setroom==FALSE) {
-                $d[$direction].="      <span class=\"RoomName\">{$rooms[$room_id]['strRoom']}</span><br />\r\n";
+                $d[$direction].="      <span class=\"RoomName\">{$this->rooms[$room_id]['strRoom']}</span><br />\r\n";
                 if($this->now_time=='' OR $this->now_time==0 OR $this->arrTalkSlots[$this->now_time][$room_id]==0 OR $this->arrTalkSlots[$this->now_time][$room_id]==-1) {$talk="Empty";} else {
                   $talk=$this->arrTalks[$this->arrTalkSlots[$this->now_time][$room_id]]['strTalkTitle'];
                   if($this->arrTalks[$this->arrTalkSlots[$this->now_time][$room_id]]['intTalkID']!=$this->arrTalkSlots[$this->now_time][$room_id]) {$talk." (continued)";}

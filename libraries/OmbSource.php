@@ -50,9 +50,10 @@ class OmbSource extends ProcessingSources {
     }
   }
 
-  function sendMessages($strMessage='', $a='', $b='') {
-    $this->doDebug("sendMessages('$strMessage');");
-    return($this->_api->send_message($strMessage));
+  function sendMessages($strMessage='', $person='', $maxlen=140) {
+    $this->doDebug("sendMessages('$strMessage', '$person');");
+    if($person!='') {$strMessage="d $person $strMessage";}
+    return($this->_api->send_message(substr($strMessage, 0, $maxlen)));
   }
 }
 
@@ -224,7 +225,7 @@ abstract class GetBaseAPI extends GenericBaseClass {
   function showApi() {return(array('strApiBase'=>$this->cx_data['strApiBase'], 'strUsername'=>$this->cx_data['strUsername']));}
 
   protected function get_data($url, $userpass='') {
-    $this->doDebug("get_data('$url', '$userpass')");
+    $this->doDebug("get_data('$url', '" . $this->cx_data['strUsername'] . "')");
     $curl=curl_init();
     curl_setopt($curl, CURLOPT_URL, $url);
     if($userpass!='') {curl_setopt($curl, CURLOPT_USERPWD, $userpass);}
@@ -237,7 +238,16 @@ abstract class GetBaseAPI extends GenericBaseClass {
     $data=curl_exec($curl);
     curl_close($curl);
 
-    if(!$data) {echo "No Data!"; return FALSE;} else {if($data === FALSE) {echo "Error!"; return FALSE;} else {return $data;}}
+    if(!$data) {
+      $this->doDebug("No Data received from the server", 2); 
+      return FALSE;
+    } elseif($data === FALSE) {
+      $this->doDebug("Error connecting to the server", 2);
+      return FALSE;
+    } else {
+      $this->doDebug("Response: $data", 2); 
+      return $data;
+    }
   }
 
   protected function post_data($url, $userpass='', $post_data=array()) {

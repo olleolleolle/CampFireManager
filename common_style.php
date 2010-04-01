@@ -23,7 +23,7 @@ $row_heights=100/(count($Camp_DB->rooms)+1);
 body {font-size:10px; vertical-align:middle; text-align:center;}
 .HelpInfo {height:50; width:100%;}
 .headerbar {font-weight:bold; font-size:30px; text-align:center;}
-.numberbar, .ombbar, .webbar, .menubar, .CommandInfo {font-size:15px; text-align:center;}
+.numberbar, .ombbar, .webbar, .menubar, .hashtag, .CommandInfo {font-size:15px; text-align:center;}
 .mainbody {width:100%;}
 table.WholeDay {font-size:10px; width:100%;height:80%;border-collapse:collapse;}
 table.WholeDay,th.Time,td.Entry {border: 1px dotted black;}
@@ -38,6 +38,7 @@ tr.entry {height:<?php echo $row_heights; ?>%;}
 .Fixed {color:Red;}
 .Count {font-size:9px;}
 .Label {font-size:9px;}
+.Right {text-align:right;}
 .Long {background-color:Silver;}
 .Time_title {background-color:Gray;}
 .Next {background-color:LightBlue;}
