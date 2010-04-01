@@ -29,31 +29,21 @@ $contact_fields=array('mailto', 'twitter', 'linkedin', 'identica', 'statusnet', 
 <html>
   <head>
   <title><?php echo $Camp_DB->config['event_title']; ?></title>
+  <link rel="stylesheet" type="text/css" href="common_style.php" />
   <script type="text/javascript" src="external/jquery-1.4.1.min.js"></script>
   <script type="text/javascript" src="external/jquery.marquee.js"></script>
   <?php $xajax->printJavascript(); ?>
 
   <script type="text/javascript">
     $(document).ready(function(){
-      $('.Show').click(function() {
-        $('.Hide').show('fast');
-        $('.Show').hide('fast');
-        event.preventDefault();
-      });
-      $('.Hide').click(function() {
-        $('.Show').show('fast');
-        $('.Hide').hide('fast');
-        event.preventDefault();
-      });
+      $('.HideWithJS').hide('fast');
     });
     function update() {
       xajax_ajaxPopulateTable();
-      setTimeout("update()", 10000);
+      setTimeout("update()", 20000);
     }
   </script>
   </head>
-  <style type="text/css">
-  <?php echo $commonStyle; ?>
   </style>
   <body>
 <?php
@@ -143,11 +133,11 @@ if(!isset($_SESSION['openid'])) {
       break;
   }
   $Camp_DB->refresh();
-  echo "<div class=\"MenuBar\">\r\n<a href=\"$baseurl?state=logout\">Log out</a> |\r\n <a href=\"$baseurl?state=O\">Add other access methods</a> |\r\n <a href=\"$baseurl?state=I\">Amend contact details</a> |\r\n <a href=\"{$baseurl}ical/\">ical</a>";
+  echo "<div class=\"MenuBar\">\r\n<a href=\"$baseurl\" class=\"HideWithJS\">Reload this static page</a><span class=\"HideWithJS\"> |\r\n</span><a href=\"$baseurl?state=logout\">Log out</a> |\r\n <a href=\"$baseurl?state=O\">Add other access methods</a> |\r\n <a href=\"$baseurl?state=I\">Amend contact details</a> |\r\n <a href=\"{$baseurl}ical/\">ical</a> ";
   if($Camp_DB->checkAdmin()!=0) {echo "|\r\n <a href=\"{$baseurl}admin.php\">Modify config values</a>";}
   echo "\r\n</div>\r\n";
-  echo '  <div id="mainbody" class="mainbody"></div>
-  <div id="sms_list" class="sms_list"></div>
+  echo '  <div id="mainbody" class="mainbody">' . $Camp_DB->getTimetableTemplate(FALSE, TRUE). '</div>
+  <div id="sms_list" class="sms_list">' . $Camp_DB->getSmsTemplate() . '</div>
   <script type="text/javascript">update();</script>';
 }
 ?>

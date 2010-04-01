@@ -23,12 +23,15 @@ require_once("{$base_dir}common_xajax.php");
 <html>
 <head><title><?php echo $Camp_DB->config['event_title']; ?></title>
 <link rel="stylesheet" type="text/css" href="common_style.php" />
+<style type="text/css">.Contact {display:none;}</style>
 <script type="text/javascript" src="external/jquery-1.4.1.min.js"></script>
 <script type="text/javascript" src="external/jquery.marquee.js"></script>
 <script type="text/javascript" src="external/jquery.clock.js"></script>
 <?php $xajax->printJavascript(); ?>
-
 <script type="text/javascript">
+  $(function($) {
+    $('.clock').jclock();
+  });
   function update() {
     xajax_ajaxPopulateTable();     
     setTimeout("update()", 10000);
@@ -36,7 +39,7 @@ require_once("{$base_dir}common_xajax.php");
 </script>
 </head>
 <body>
-<h1 class="headerbar"><?php echo $Camp_DB->config['event_title']; ?></h1><span class="Clock TopRightCorner"></span>
+<h1 class="headerbar"><?php echo $Camp_DB->config['event_title']; ?></h1><span class="clock TopRightCorner"></span>
 
 <?php
 echo renderHelp($Camp_DB, TRUE);

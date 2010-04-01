@@ -33,7 +33,7 @@ tr.entry {height:<?php echo $row_heights; ?>%;}
 .TalkID {vertical-align:top;}
 .TalkTitle {font-size:13px;text-align:center;}
 .Presenter {text-align:right;font-size:9px;}
-.Contact {display:none;}
+.Contact {text-align:center;font-size:9px;}
 .Location {font-size:11px;text-align:right;}
 .Fixed {color:Red;}
 .Count {font-size:9px;}
@@ -58,6 +58,6 @@ td.TEXT {vertical-align:middle; text-align:center; width:100%;}
 tr.inner {vertical-align:middle; text-align:center;}
 .Show {display:visible; text-decoration: underline;}
 .Hide {display:none;}
-.TopRightCorner {position:absolute; top:0; right:0;}
+.TopRightCorner {position:absolute; top:0; right:1; font-size:12px;}
 .DrawAttention {background-color:#FF3333; color:White;}
 .Times {background-color:#FFA078;}

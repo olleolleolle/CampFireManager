@@ -58,9 +58,7 @@ if($Camp_DB->getAdmins()==0) { // If there's no-one here yet, you get it by defa
 <head>
 <title>{$Camp_DB->config['event_title']}</title>
 </head>
-<style type=\"text/css\">
-$commonStyle
-</style>
+<link rel="stylesheet" type="text/css" href="common_style.php" />
 <body>
 <a href=\"$baseurl\">Back to main screen</a>
 <form method=\"post\" action=\"{$baseurl}admin.php\" class=\"WholeDay\">

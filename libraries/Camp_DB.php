@@ -766,37 +766,37 @@ class Camp_DB extends GenericBaseClass {
           if($asArray==FALSE) {
             switch($proto) {
               case "mailto":
-                if($real_data!='') {$data="<a href=\"mailto:$real_data\">e-mail</a>";}
+                if($real_data!='') {$data="<a href=\"mailto:$real_data\">e-mail</a> ";}
                 break;
               case "twitter":
-                if($real_data!='') {$data="<a href=\"http://twitter.com/$real_data\">twitter</a>";}
+                if($real_data!='') {$data="<a href=\"http://twitter.com/$real_data\">twitter</a> ";}
                 break;
               case "linkedin":
-                if($real_data!='') {$data="<a href=\"http://linkedin.com/in/$real_data\">linked in</a>";}
+                if($real_data!='') {$data="<a href=\"http://linkedin.com/in/$real_data\">linked in</a> ";}
                 break;
               case "identica":
-                if($real_data!='') {$data="<a href=\"http://identi.ca/$real_data\">identi.ca</a>";}
+                if($real_data!='') {$data="<a href=\"http://identi.ca/$real_data\">identi.ca</a> ";}
                 break;
               case "statusnet":
-                if($real_data!='') {$data="<a href=\"$real_data\">StatusNet</a>";}
+                if($real_data!='') {$data="<a href=\"$real_data\">StatusNet</a> ";}
                 break;
               case "facebook":
-                if($real_data!='') {$data="<a href=\"http://facebook.com/$real_data\">facebook</a>";}
+                if($real_data!='') {$data="<a href=\"http://facebook.com/$real_data\">facebook</a> ";}
                 break;
               case "irc":
-                if($real_data!='') {$data="<a href=\"irc://$real_data\">irc</a>";}
+                if($real_data!='') {$data="<a href=\"irc://$real_data\">irc</a> ";}
                 break;
               case "url":
-                if($real_data!='') {$data="<a href=\"$real_data\">URL</a>";}
+                if($real_data!='') {$data="<a href=\"$real_data\">URL</a> ";}
                 break;
               case "http":
-                if($real_data!='') {$data="<a href=\"http:$real_data\">URL</a>";}
+                if($real_data!='') {$data="<a href=\"http:$real_data\">URL</a> ";}
                 break;
               case "https":
-                if($real_data!='') {$data="<a href=\"https:$real_data\">URL</a>";}
+                if($real_data!='') {$data="<a href=\"https:$real_data\">URL</a> ";}
                 break;
             }
-            if($return!='' AND $data!='') {$contact_data.=' | ';}
+            if($return!='' AND $data!='') {$data.=' | ';}
             $return.=$data;
           } else {
             switch($proto) {
@@ -943,16 +943,15 @@ class Camp_DB extends GenericBaseClass {
   }
   function checkAdmin() {return($this->isAdmin);}
 
-  function getSmsTemplate($sms_limit) {
+  function getSmsTemplate($sms_limit=50) {
+    if(!isset($sms_limit)) {$sms_limit=50;}
     $this->doDebug("getSmsTemplate($sms_limit);");
     // Set Defaults
-    if(!isset($sms_limit)) {$sms_limit=50;}
-
     $sms_list='';
     $messages=$this->showStatusScreen($sms_limit);
 
     if(count($messages)>0) {
-      foreach($messages as $message) {$sms_list.="$message<br />";}
+      foreach($messages as $message) {$sms_list.=stripslashes(htmlentities($message)) . "<br />";}
     }
     return($sms_list);
   }
@@ -963,6 +962,9 @@ class Camp_DB extends GenericBaseClass {
     if(!isset($includeProposeLink)) {$includeProposeLink=FALSE;}
 
     $this->doDebug("getTimetableTemplate($includeCountData, $includeProposeLink);");
+
+    session_start();
+    if(isset($_SESSION['openid'])) {$this->getMe(array('OpenID'=>$_SESSION['openid'], 'OpenID_Name'=>$_SESSION['name'], 'OpenID_Mail'=>$_SESSION['email']));}
 
     // Get the talks this person is presenting
     $my_talks=$this->getMyTalks();
@@ -1013,19 +1015,23 @@ class Camp_DB extends GenericBaseClass {
               $mainbody.="          <tr class=\"TalkID\"><td class=\"TalkID\"><span class=\"Label\">Talk:</span> <span class=\"Data\">{$talk['intTalkID']}</span></td></tr>\r\n";
             }
             $mainbody.="          <tr class=\"TalkTitle\"><td class=\"TalkTitle\"><span colspan=\"2\">\r\n";
-            $mainbody.=$talk['strTalkTitle'] . "\r\n";
+            $mainbody.=htmlentities($talk['strTalkTitle']) . "\r\n";
             if(isset($my_talks) && $intTimeID>$this->now_time && $talk['intTalkID']!='' && isset($my_talks[$talk['intTalkID']])) {
               $mainbody.="(<a href=\"$baseurl?state=C&talkid={$talk['intTalkID']}\" class=\"action\">Cancel</a> | <a href=\"$baseurl?state=E&talkid={$talk['intTalkID']}\" class=\"action\">Retitle</a>)";
             }
             $mainbody.="</span></td></tr>\r\n";
             if($talk['strPresenter']!='') {
-              $mainbody.="          <tr class=\"Presenter\"><td class=\"Presenter\"><span class=\"Label\">By:</span> <span class=\"Data\">{$talk['strPresenter']}</span></td></tr>\r\n";
+              $mainbody.="          <tr class=\"Presenter\"><td class=\"Presenter\"><span class=\"Label Presenter\">By:</span> <span class=\"Data Presenter\">{$talk['strPresenter']}</span></td></tr>\r\n";
             }
             if($talk['strContactInfo']!='') {
-              $mainbody.="          <tr class=\"Contact\"><td class=\"Contact\"><span class=\"Label\">Contact:</span> <span class=\"Data\">{$talk['strContactInfo']}</span></td></tr>\r\n";
+              $mainbody.="          <tr class=\"Contact\"><td class=\"Contact\"><span class=\"Label\">Contact:</span> <span class=\"Data\">" . $this->getContactDetails($talk['intPersonID']) . "</span></td></tr>\r\n";
             }
             if($talk['boolFixed']>0) {
               $mainbody.="          <tr class=\"Location\"><td class=\"Location\"><span class=\"Label\">Location:</span> <span class=\"Data\">{$this->rooms[$intRoomID]['strRoom']}</span></td></tr>\r\n";
+            }
+            if(isset($my_talks) && $intTimeID>$this->now_time && $talk['intTalkID']!='' && isset($my_talks[$talk['intTalkID']])) {
+              if($talk['intCount']>$arrRoom['intCapacity']) {$countClass="Over";} else {$countClass="";}
+              $mainbody.="          <tr class=\"Count\"><td class=\"Count\"><span class=\"Label\">Attending:</span> <span class=\"Data $countClass\">{$talk['intCount']}</span><td></tr>\r\n";
             }
             if(isset($includeCountData) && $includeCountData==TRUE) {
               if($talk['intCount']>$arrRoom['intCapacity']) {$countClass="Over";} else {$countClass="";}
