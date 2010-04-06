@@ -827,41 +827,43 @@ class Camp_DB extends GenericBaseClass {
     $contact_name='';
     $contact_data='';
     foreach($commands as $cid=>$command) {
+      $data='';
+      $this->doDebug("Handling fragment $command", 2);
       if(strpos($command, ":")===FALSE) {
+        $this->doDebug("Which isn't a protocol",3);
         if($contact_name!='') {$contact_name.=' ';}
         $contact_name.=$command;
-      }
-      foreach($contact_fields as $proto) {
-        if(strpos($command, $proto)!==FALSE) {
-          $proto_data=explode(':', $command);
-          $real_data='';
-          foreach($proto_data as $id=>$p_data) {
-            if($id!=0) {
-              if($real_data!='') {$real_data.=':';}
-              $real_data.=$p_data;
-            }
+      } else {
+        $proto_data=explode(':', $command);
+        $real_data='';
+        foreach($proto_data as $id=>$p_data) {
+          if($id==0) {
+            $proto=$p_data;
+          } else {
+            if($real_data!='') {$real_data.=':';}
+            $real_data.=$p_data;
           }
-          switch($proto) {
-            case "mailto":
-            case "email":
-              if($real_data!='') {$data="mailto:$real_data";}
-              break;
-            case "twitter":
-            case "linkedin":
-            case "identi.ca":
-            case "statusnet":
-            case "facebook":
-            case "irc":
-            case "url":
-            case "http":
-            case "https":
-              if($real_data!='') {$data="$proto:$real_data";}
-              break;
-          }
-          if($contact_data!='' AND $data!='') {$contact_data.=' ';}
-          $contact_data.=$data;
         }
-      }
+        switch($proto) {
+          case "mailto":
+          case "email":
+            if($real_data!='') {$data="mailto:$real_data";}
+            break;
+          case "twitter":
+          case "linkedin":
+          case "identi.ca":
+          case "statusnet":
+          case "facebook":
+          case "irc":
+          case "url":
+          case "http":
+          case "https":
+            if($real_data!='') {$data="$proto:$real_data";}
+            break;
+        }
+        if($contact_data!='' AND $data!='') {$contact_data.=' ';}
+        $contact_data.=$data;
+      } 
     }
     $this->_updateIdentityInfo($contact_name, $contact_data);
     $this->updateStatusScreen("$contact_name updated their details on the system.");
