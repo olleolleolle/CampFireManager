@@ -77,13 +77,13 @@ if($next>0) {
 }
 if($is_lunch==1) {$next_talks="Lunch<br />" . $next_talks;}
 if($now_talks!='' and $next_talks!='') {echo '<h2>On Now and Next</h2>';}
-if($now_talks!='') {echo "Talks on now: (started at " . $Camp_DB->arrTimeEndPoints[$now]['s'] . "):<br />$now_talks";}
-if($next_talks!='') {echo "Talks on next (starts at " . $Camp_DB->arrTimeEndPoints[$next]['s'] . "):<br />$next_talks";}
+if($now_talks!='') {echo "<h3>Talks on now: (started at " . $Camp_DB->arrTimeEndPoints[$now]['s'] . "):</h3>$now_talks";}
+if($next_talks!='') {echo "<h3>Talks on next (starts at " . $Camp_DB->arrTimeEndPoints[$next]['s'] . "):</h3>$next_talks";}
 if(!isset($_SESSION['openid'])) {
   echo "<a href=\"?login\">Login to CampFireManager</a>";
 } else {
   if(isset($_GET['list']) or isset($_GET['my'])) {
-    if(isset($_GET['list'])) {echo "<h2>List all unfinished talks</h2>";} else {echo "<h2>List all my unfinished talks</h2>";}
+    if(isset($_GET['list'])) {echo "<h2>List talks yet to start</h2>";} else {echo "<h2>List my talks yet to start</h2>";}
     $person=$Camp_DB->allMyDetails();
     foreach($Camp_DB->times as $intTimeID=>$arrTime) {
       if($intTimeID>$now) {
@@ -132,8 +132,8 @@ if(!isset($_SESSION['openid'])) {
   }
   echo "<h2>Options</h2>";
   echo "<a href=\"$baseurl?propose\">Propose a talk</a><br />"; 
-  echo "<a href=\"$baseurl?list\">List all unfinished talks</a><br />"; 
-  echo "<a href=\"$baseurl?my\">List all my unfinished talks</a><br />"; 
+  echo "<a href=\"$baseurl?list\">List talks which are yet to start</a><br />"; 
+  echo "<a href=\"$baseurl?my\">List my talks which are yet to start</a><br />"; 
   echo "<a href=\"$baseurl?contact\">Change my contact details</a><br />";
 }
 ?>
