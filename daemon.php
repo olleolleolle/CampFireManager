@@ -46,7 +46,7 @@ while(true) {
     foreach($Camp_DB->arrTalkSlots[$next_talk_time] as $fix_intRoomID=>$fix_intTalkID) {if($fix_intTalkID>0) {
       $broadcast_talks[$fix_intTalkID]['strTalkTitle']=$Camp_DB->arrTalks[$fix_intTalkID]['strTalkTitle'];
       $broadcast_talks[$fix_intTalkID]['strRoom']=$Camp_DB->rooms[$Camp_DB->arrTalks[$fix_intTalkID]['intRoomID']]['strRoom'];
-      $contact=getContactDetails($Camp_DB->arrTalks[$fix_intTalkID]['intPersonID'], TRUE);
+      $contact=$Camp_DB->getContactDetails($Camp_DB->arrTalks[$fix_intTalkID]['intPersonID'], TRUE);
       if(isset($contact['twitter']) and $contact['twitter']!='') {
         $broadcast_talks[$fix_intTalkID]['strPerson']='@' . $contact['twitter'];
       } elseif(isset($contact['identica']) and $contact['identica']!='') {
