@@ -159,13 +159,13 @@ class Camp_DB extends GenericBaseClass {
         if(isset($me['phone_number'])) {if($set!='') {$set.=", ";} $set.="strPhoneNumber='{$me['phone_number']}'"; }
         if(isset($me['microblog_account'])) {if($set!='') {$set.=", ";} $set.="strMicroBlog='{$me['microblog_account']}'"; }
         if(isset($me['microblog_name']) AND $strName=='') {if($set!='') {$set.=", ";} $set.="strName='{$me['microblog_name']}'"; }
-        $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}people SET $set WHERE intPersonID='$intPersonID'");
+        if($set!='') {$this->boolUpdateOrInsertSql("UPDATE {$this->prefix}people SET $set WHERE intPersonID='$intPersonID'");}
       } else {
         // User doesn't exist
         // Generate an authString for them
         $authString='';
         while($authString=='') {
-          $authString=genRandStr(5, 10);
+          $authString=genRandStr(5, 9);
           if(count($this->qryMap('intPersonID', 'strAuthString', "{$this->prefix}people WHERE strAuthString='$authString'"))!=0) {
             $authString='';
           }
@@ -212,6 +212,18 @@ class Camp_DB extends GenericBaseClass {
   }
 
   function getAuthStrings() {return($this->qryMap('intPersonID', 'strAuthString', "people WHERE intPersonID='{$this->intPersonID}' AND strAuthString!=''"));}
+
+  function fixTalk($intTalkID) {
+    $this->doDebug("fixTalk($intTalkID);");
+    if($this->arrTalks[$intTalkID]['boolFixed']==0) {
+      $this->doDebug("Talk $intTalkID is fixed", 2);
+      $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}talks SET boolFixed=1 WHERE intTalkID='$intTalkID'");
+    } else {
+      $this->doDebug("Talk $intTalkID is unfixed", 2);
+      $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}talks SET boolFixed= WHERE intTalkID='$intTalkID'");
+    }
+    $this->refresh();
+  }
 
   protected function _createTalk($intTimeID, $intRoomID, $intPersonID, $strTalkTitle, $boolFixed, $intLength) {
     $this->doDebug("_createTalk('$intTimeID', '$intRoomID', '$intPersonID', '$strTalkTitle', '$boolFixed', '$intLength');");
@@ -325,13 +337,13 @@ class Camp_DB extends GenericBaseClass {
 
   function generateNewAdminKey() {
     $this->doDebug("generateNewAdminKey();");
-    $this->boolUpdateOrInsertSql("REPLACE INTO {$this->prefix}config (strConfig, strValue) VALUES ('adminkey', '" . genRandStr(10, 20) . "')"); 
+    $this->boolUpdateOrInsertSql("REPLACE INTO {$this->prefix}config (strConfig, strValue) VALUES ('adminkey', '" . genRandStr(10, 10) . "')"); 
     $this->config=$this->getConfig();
   }
 
   function generateNewSupportKey() {
     $this->doDebug("generateNewSupportKey();");
-    $this->boolUpdateOrInsertSql("REPLACE INTO {$this->prefix}config (strConfig, strValue) VALUES ('supportkey', '" . genRandStr(10, 20) . "')"); 
+    $this->boolUpdateOrInsertSql("REPLACE INTO {$this->prefix}config (strConfig, strValue) VALUES ('supportkey', '" . genRandStr(10, 10) . "')"); 
     $this->config=$this->getConfig();
   }
 

@@ -75,21 +75,21 @@ if(!isset($_SESSION['openid'])) {
           <form method="get" action="try_auth.php">
             <input type="hidden" name="action" value="verify" />
             <input type="hidden" name="openid_identifier" value="https://www.google.com/accounts/o8/id" />
-            <input type="image" src="images/google.png" />
+            <input type="image" src="images/google.png" alt="Sign in using your Google Account" />
           </form>
         </td>
         <td>
           <form method="get" action="try_auth.php">
             <input type="hidden" name="action" value="verify" />
-            <input type="hidden" name="openid_identifier" value="https://www.yahoo.com" />
-            <input type="image" src="images/yahoo.png" />
+            <input type="hidden" name="openid_identifier" value="http://yahoo.com" />
+            <input type="image" src="images/yahoo.png" alt="Sign in using your Yahoo Account" />
           </form>
         </td>
         <td>
           <form method="get" action="try_auth.php">
             <input type="hidden" name="action" value="verify" />
-            <input type="hidden" name="openid_identifier" value="http://api.myspace.com/openid" />
-            <input type="image" src="images/myspace.png" />
+            <input type="hidden" name="openid_identifier" value="http://myspace.com" />
+            <input type="image" src="images/myspace.png" alt="Sign in using your MySpace Account" />
           </form>
         </td>
       </tr>

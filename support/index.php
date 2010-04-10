@@ -15,6 +15,10 @@ session_start();
 if(isset($_SESSION['redirect'])) {unset($_SESSION['redirect']);}
 $base_dir="../libraries/";
 require_once("../db.php");
+// Find the "Now" and "Next" time blocks
+$now_and_next=$Camp_DB->getNowAndNextTime();
+$now=$now_and_next['now'];
+$next=$now_and_next['next'];
 $contact_fields=array('mailto', 'twitter', 'linkedin', 'identica', 'statusnet', 'facebook', 'irc', 'http', 'https');
 if(!isset($Camp_DB->config['adminkey'])) {$Camp_DB->generateNewAdminKey();}
 if(!isset($Camp_DB->config['supportkey'])) {$Camp_DB->generateNewSupportKey();}
@@ -54,8 +58,7 @@ if($Camp_DB->getSupport()==0 AND $Camp_DB->getAdmins()==0) {
     $status=$Camp_DB->getPerson(array('strName'=>'%' . $_POST['name'] . '%'));
   }
   if(isset($_SESSION['support_user'])) {
-    $people=$Camp_DB->getPerson(array('intPersonID'=>$_SESSION['support_user']));
-    foreach($people as $person) {}
+    $person=$Camp_DB->allMyDetails();
     echo "<td class=\"right\"><a href=\"{$baseurl}?logout\" class=\"Label\">Stop supporting this attendee</a></td>";
     $auth_code=$Camp_DB->getAuthCode();
   }
@@ -87,8 +90,7 @@ if($Camp_DB->getSupport()==0 AND $Camp_DB->getAdmins()==0) {
         foreach($contact_fields as $proto) {if(isset($_REQUEST[$proto])) {$data[]=$proto . ":" . $Camp_DB->escape($_REQUEST[$proto]);}}
         $Camp_DB->updateIdentityInfo($data);
         $Camp_DB->refresh();
-        $people=$Camp_DB->getPerson(array('intPersonID'=>$_SESSION['support_user']));
-        foreach($people as $person) {}
+        $person=$Camp_DB->allMyDetails();
       }
     }
     echo "This is: <b>{$person['strName']}</b> with an AuthCode: <b>$auth_code</b><br />";
@@ -97,7 +99,8 @@ if($Camp_DB->getSupport()==0 AND $Camp_DB->getAdmins()==0) {
     if($person['strContactInfo']!='' and (count($arrPhones)>0 and $person['strPhoneNumber']!='')) {echo " ";}
     if($person['strContactInfo']!='') {echo "{$person['strContactInfo']}";}
     if($person['strContactInfo']!='' or (count($arrPhones)>0 and $person['strPhoneNumber']!='')) {echo "<br />";}
-    echo "<a href=\"?contact\">Amend contact details</a> | <a href=\"?propose\">Propose a talk</a> | <a href=\"?edit\">Edit a talk</a> | <a href=\"?cancel\">Cancel a talk</a> | <a href=\"?fix\">Fix a talk</a> | <a href=\"?attend\">Attend a talk</a> | <a href=\"?decline\">Decline a talk</a><br />"; 
+    echo "<a href=\"?contact\">Amend contact details</a> | <a href=\"?propose\">Propose a talk</a>";
+
     if(isset($_REQUEST['contact'])) {
       $details=$Camp_DB->getContactDetails(0, TRUE);
       echo "\r\n<form method=\"post\" action=\"$baseurl?contact\">\r\nYour name:\r\n<div class=\"data_Name\"><span class=\"Label\">Name:</span> <span=\"Data\"><input type=\"text\" name=\"name\" value=\"{$person['strName']}\" /></span></div>";
@@ -106,33 +109,65 @@ if($Camp_DB->getSupport()==0 AND $Camp_DB->getAdmins()==0) {
       }
       echo "\r\n<input type=\"submit\" name=\"update\" value=\"Go\"/></form>";
     } elseif(isset($_REQUEST['propose'])) {
-      if(isset($_POST['update'])) {$Camp_DB->insertTalk(array($_POST['slot'], $_POST['length'], $_POST['title']), 0);}
-      echo "\r\n<form method=\"post\" action=\"$baseurl?propose\">\r\nPropose a new talk, starting at slot: <input type=\"text\" size=\"2\" name=\"slot\"/>\r\n and with a length of \r\n<select name=\"length\">";
-      $left=count($Camp_DB->times);
+      if(isset($_POST['update'])) {
+        $Camp_DB->insertTalk(array($_POST['slot'], $_POST['length'], $_POST['title']), 0);
+        $Camp_DB->refresh();
+      }
+      echo "\r\n<form method=\"post\" action=\"$baseurl?propose\">\r\nPropose a new talk, starting at slot: <select name=\"slot\">";
+      foreach($Camp_DB->times as $intTimeID=>$strTime) {
+        if($intTimeID>$now) {
+          echo "<option value=\"$intTimeID\">{$Camp_DB->arrTimeEndPoints[$intTimeID]['s']}</option>";
+        }
+      }
+      echo "</select>\r\n and with a length of \r\n<select name=\"length\">";
+      $left=count($Camp_DB->times)-$now;
       for($l=1; $l<=$left; $l++) {echo "<option value=\"$l\">$l</option>";}
       echo "</select> \r\nslots. The talk will be about: \r\n<input type=\"text\" size=\"50\" name=\"title\" />\r\n<input type=\"submit\" name=\"update\" value=\"Go\"/></form>";
     } elseif(isset($_REQUEST['edit'])) {
       if(isset($_POST['update'])) {$Camp_DB->editTalk(array($_REQUEST['talkid'], $Camp_DB->arrTalks[$_REQUEST['talkid']]['intTimeID'], $Camp_DB->escape(htmlentities($_REQUEST['ntitle']) . ' ')));}
-
-// TODO: Make this list all my talks, and edit from that
-
-      echo "<form method=\"post\" action=\"$baseurl?edit\">\r\nRetitle a talk with a talk ID of: <input type=\"text\" size=\"2\" name=\"talkid\" />\r\n With the new title <input type=\"text\" size=\"50\" name=\"ntitle\" />\r\n<input type=\"submit\" name=\"update\" value=\"Go\"/></form>";
+      echo "<h2>Edit Talk</h2><form method=\"post\" action=\"$baseurl?edit\">\r\nRetitle a talk with a talk ID of: <input type=\"text\" size=\"2\" name=\"talkid\" value=\"{$_GET['edit']}\"/>\r\n With the new title <input type=\"text\" size=\"50\" name=\"ntitle\" value=\"{$Camp_DB->arrTalks[$_GET['edit']]['strTalkTitle']}\" />\r\n<input type=\"submit\" name=\"update\" value=\"Go\"/></form>";
     } elseif(isset($_REQUEST['cancel'])) {
       if(isset($_POST['update'])) {$Camp_DB->cancelTalk(array($_REQUEST['talkid'], $Camp_DB->arrTalks[$_REQUEST['talkid']]['intTimeID'], $Camp_DB->escape(htmlentities($_REQUEST['reason']))));}
-
-// TODO: Make this list all my talks, and cancel from that
-
-      echo "\r\n<form method=\"post\" action=\"$baseurl?cancel\">Cancel a talk with a talk ID of: <input type=\"text\" size=\"2\" name=\"talkid\" value=\"{$_GET['talkid']}\" />\r\n Because <input type=\"text\" size=\"50\" name=\"reason\" />\r\n<input type=\"submit\" name=\"update\" value=\"Go\"/></form>";
-    } elseif(isset($_REQUEST['fix'])) {
-
-// TODO: Make this list all my talks, and fix the talk from that
-
-    } elseif(isset($_REQUEST['attend'])) {
-
-// TODO: Make this list all talks that aren't mine, and attend from those (prolly by rendering the calendar!).
-
-    } elseif(isset($_REQUEST['decline'])) {
-// TODO: Make this list all talks that I'm showing as attending, and decline from that.
+      echo "<h2>Cancel Talk</h2><form method=\"post\" action=\"$baseurl\"><input type=\"hidden\" name=\"cancel\">Cancel a talk with a talk ID of: <input type=\"text\" size=\"2\" name=\"talkid\" value=\"{$_GET['cancel']}\" />\r\n Because <input type=\"text\" size=\"50\" name=\"reason\" />\r\n<input type=\"submit\" name=\"update\" value=\"Go\"/></form>";
+    } elseif(isset($_GET['fix'])) {
+      $Camp_DB->fixTalk($_GET['fix']);
+    } elseif(isset($_GET['attend'])) {
+      $Camp_DB->attendTalk($_GET['attend']);
+    } elseif(isset($_GET['decline'])) {
+      $Camp_DB->declineTalk($_GET['decline']);
+    }
+    
+    echo "<h2>Future Talks</h2>";
+    $person=$Camp_DB->allMyDetails();
+    $attend_talks=$Camp_DB->getTalksIAmAttending();
+    foreach($Camp_DB->times as $intTimeID=>$arrTime) {
+      if($intTimeID>$now) {
+        foreach($Camp_DB->arrTalkSlots[$intTimeID] as $intRoomID=>$intTalkID) {
+          if(!isset($showtalk[$intTalkID]) and $intTalkID>0) {
+            echo "<p>Talk $intTalkID: " . $Camp_DB->arrTalks[$intTalkID]['strTalkTitle'];
+            if($Camp_DB->arrTalks[$intTalkID]['intPersonID']==$person['intPersonID']) {
+              echo " <a href=\"$baseurl?edit=$intTalkID\">Edit</a> | 
+                     <a href=\"$baseurl?cancel=$intTalkID\">Cancel</a> |
+                     <a href=\"$baseurl?fix=$intTalkID\">";
+              if($Camp_DB->arrTalks[$intTalkID]['boolFixed']==0) {
+                echo " Fix in room {$Camp_DB->rooms[$Camp_DB->arrTalks[$intTalkID]['intRoomID']]['strRoom']}";
+              } else {
+                echo " Unfix talk (currently in {$Camp_DB->rooms[$Camp_DB->arrTalks[$intTalkID]['intRoomID']]['strRoom']})";
+              }
+              echo "</a>";
+            } else {
+              echo " by " . $Camp_DB->arrTalks[$intTalkID]['strPresenter'];
+              if(!isset($attend_talks[$intTalkID])) {
+                echo " <a href=\"$baseurl?attend=$intTalkID\">Attend</a>";
+              } else {
+                echo " <a href=\"$baseurl?decline=$intTalkID\">Decline</a>";
+              }
+            }
+            echo "</p>";
+            $showtalk[$intTalkID]=TRUE;
+          }
+        }
+      }
     }
   }
   echo "</body></html>";
