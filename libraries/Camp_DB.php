@@ -101,6 +101,9 @@ class Camp_DB extends GenericBaseClass {
     // Have we changed our personID?
     if(isset($me['intPersonID'])) {$where="intPersonID='{$me['intPersonID']}'";}
 
+    // Or are we providing support to a user?
+    if(isset($me['strAuthString'])) {$where="strAuthString='{$me['strAuthString']}'";}
+
     // Check for a Phone Account
     if(isset($me['number'])) {
       $me['number']=$this->escape($me['number']);
@@ -168,19 +171,27 @@ class Camp_DB extends GenericBaseClass {
           }
         }
         // Now add it to the database
-        if($me['number']!='') {$this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}people (strPhoneNumber, strName, strDefaultReply, strAuthString) VALUES ('{$me['number']}', '{$me['phone_nick']}', '{$me['phone']}', '$authString')");}
-        if($me['microblog_account']!='') {$this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}people (strMicroBlog, strName, strAuthString, strDefaultReply) VALUES ('{$me['microblog_account']}', '{$me['microblog_name']}', '$authString', '{$me['strDefaultReply']}')");}
-        if($me['OpenID']!='') {$this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}people (strOpenID, strName, strContactInfo, strAuthString) VALUES ('{$me['OpenID']}', '{$me['OpenID_Name']}', '{$me['OpenID_Mail']}', '$authString')");}
+        if($me['number']!='') {
+          $this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}people (strPhoneNumber, strName, strDefaultReply, strAuthString) VALUES ('{$me['number']}', '{$me['phone_nick']}', '{$me['phone']}', '$authString')");
+        } elseif($me['microblog_account']!='') {
+          $this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}people (strMicroBlog, strName, strAuthString, strDefaultReply) VALUES ('{$me['microblog_account']}', '{$me['microblog_name']}', '$authString', '{$me['strDefaultReply']}')");
+        } elseif($me['OpenID']!='') {
+          $this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}people (strOpenID, strName, strContactInfo, strAuthString) VALUES ('{$me['OpenID']}', '{$me['OpenID_Name']}', '{$me['OpenID_Mail']}', '$authString')");
+        } else {
+          $this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}people (strName, strAuthString) VALUES ('Someone being supported by one of the crew', '$authString')");
+        }
         // And return the user IDs
-        $people=$this->qryMap('intPersonID', 'strName', "{$this->prefix}people WHERE $where");
+        $people=$this->qryMap('intPersonID', 'strName', "{$this->prefix}people WHERE strAuthString='$authString'");
         foreach($people as $intPersonID=>$strName) {}
         $this->intPersonID=$intPersonID;
         $this->sendMessage("Welcome to {$this->config['event_title']}. Your authorization string for this system is: $authString.");
       }
       $checkIsAdmin=$this->qryMap('intPersonID', 'boolIsAdmin', "{$this->prefix}people WHERE intPersonID='$intPersonID'");
+      $checkIsSupport=$this->qryMap('intPersonID', 'boolIsSupport', "{$this->prefix}people WHERE intPersonID='$intPersonID'");
       $this->intPersonID=$intPersonID;
       $this->strName=$strName;
       $this->isAdmin=$checkIsAdmin[$intPersonID];
+      $this->isSupport=$checkIsSupport[$intPersonID];
       return TRUE;
     } else {
       return FALSE;
@@ -318,6 +329,12 @@ class Camp_DB extends GenericBaseClass {
     $this->config=$this->getConfig();
   }
 
+  function generateNewSupportKey() {
+    $this->doDebug("generateNewSupportKey();");
+    $this->boolUpdateOrInsertSql("REPLACE INTO {$this->prefix}config (strConfig, strValue) VALUES ('supportkey', '" . genRandStr(10, 20) . "')"); 
+    $this->config=$this->getConfig();
+  }
+
   function updatePhoneData($strPhoneID, $intSignal) {$this->boolUpdateOrInsertSql("UPDATE {$this->prefix}account_phones SET intSignal='$intSignal' WHERE strGammuRef='$strPhoneID'");}
 
   function getAllConnectionMethods() {
@@ -377,7 +394,11 @@ class Camp_DB extends GenericBaseClass {
     $w='';
     foreach($s as $key=>$value) {
       if($w!='') {$w.=" AND ";}
-      $w.="$key='" . $this->escape($value) . "'";
+      if(strpos($value, '%')!==FALSE) {
+        $w.="$key LIKE '" . $this->escape($value) . "'";
+      } else {
+        $w.="$key='" . $this->escape($value) . "'";
+      }
     }
     return($this->qryArray("SELECT * FROM {$this->prefix}people WHERE $w", 'intPersonID'));
   }
@@ -746,6 +767,12 @@ class Camp_DB extends GenericBaseClass {
     $this->doDebug("Final results: " . print_r(array('arrTalks'=>$this->arrTalks, 'arrTalkSlots'=>$this->arrTalkSlots), TRUE) . "");
   }
 
+  function setSupportUser() {$_SESSION['support_user']=$this->intPersonID;}
+  function getAuthCode() {
+    $person=$this->getPerson(array('intPersonID'=>$this->intPersonID));
+    return($person[$this->intPersonID]['strAuthString']);
+  }
+
   function getContactDetails($intPersonID=0, $asArray=FALSE) {
     if($intPersonID==0) {$intPersonID=$this->intPersonID;}
     $this->doDebug("getContactDetails('$intPersonID', '$asArray')");
@@ -945,6 +972,13 @@ class Camp_DB extends GenericBaseClass {
   }
   function checkAdmin() {return($this->isAdmin);}
 
+  function getSupport() {
+    $this->doDebug("getSupport()");
+    $return=$this->qryMap('"support"', 'count(boolIsSupport)', "{$this->prefix}people WHERE boolIsSupport!=0");
+    return($return['support']);
+  }
+  function checkSupport() {return($this->isSupport);}
+
   function getSmsTemplate($sms_limit=50) {
     if(!isset($sms_limit)) {$sms_limit=50;}
     $this->doDebug("getSmsTemplate($sms_limit);");
@@ -1014,16 +1048,16 @@ class Camp_DB extends GenericBaseClass {
             $mainbody.="      <td class=\"Entry $class\"$colspan>\r\n";
             $mainbody.="        <table class=\"EntryBody\">\r\n";
             if($intTimeID>$this->now_time && $talk['intTalkID']!='') {
-              $mainbody.="          <tr class=\"TalkID\"><td class=\"TalkID\"><span class=\"Label\">Talk:</span> <span class=\"Data\">{$talk['intTalkID']}</span></td></tr>\r\n";
+              $mainbody.="          <tr class=\"TalkID\"><td class=\"TalkID\"><span class=\"Label\">Talk Number:</span> <span class=\"Data\">{$talk['intTalkID']}</span></td></tr>\r\n";
             }
             $mainbody.="          <tr class=\"TalkTitle\"><td class=\"TalkTitle\"><span colspan=\"2\">\r\n";
-            $mainbody.=htmlentities($talk['strTalkTitle']) . "\r\n";
+            $mainbody.=htmlentities(stripslashes($talk['strTalkTitle'])) . "\r\n";
             if(isset($my_talks) && $intTimeID>$this->now_time && $talk['intTalkID']!='' && isset($my_talks[$talk['intTalkID']])) {
               $mainbody.="(<a href=\"$baseurl?state=C&talkid={$talk['intTalkID']}\" class=\"action\">Cancel</a> | <a href=\"$baseurl?state=E&talkid={$talk['intTalkID']}\" class=\"action\">Retitle</a>)";
             }
             $mainbody.="</span></td></tr>\r\n";
             if($talk['strPresenter']!='') {
-              $mainbody.="          <tr class=\"Presenter\"><td class=\"Presenter\"><span class=\"Label Presenter\">By:</span> <span class=\"Data Presenter\">{$talk['strPresenter']}</span></td></tr>\r\n";
+              $mainbody.="          <tr class=\"Presenter\"><td class=\"Presenter\"><span class=\"Label Presenter\">By:</span> <span class=\"Data Presenter\">" . htmlentities(stripslashes($talk['strPresenter'])) . "</span></td></tr>\r\n";
             }
             if($talk['strContactInfo']!='') {
               $mainbody.="          <tr class=\"Contact\"><td class=\"Contact\"><span class=\"Label\">Contact:</span> <span class=\"Data\">" . $this->getContactDetails($talk['intPersonID']) . "</span></td></tr>\r\n";

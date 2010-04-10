@@ -38,7 +38,8 @@ abstract class GenericBaseClass {
     if(mysql_num_rows($query)>0) {
       while($data=mysql_fetch_array($query)) {if($index!='') {$result[$data[$index]]=$data;} else {$result[]=$data;}}
     }
-    $this->doDebug(" (" . count($result) . ")");
+    $this->doDebug("Number of Results: " . count($result));
+    $this->doDebug("Results Data: " . print_r($result, TRUE), 2);
     return($result);
   }
 
@@ -57,7 +58,8 @@ abstract class GenericBaseClass {
     if(mysql_num_rows($query)>0) {
       while(list($idx, $value)=mysql_fetch_array($query)) {$result[$idx]=$value;}
     }
-    $this->doDebug(" (" . count($result) . ")");
+    $this->doDebug("Number of Results: " . count($result));
+    $this->doDebug("Results Data: " . print_r($result, TRUE), 2);
     return($result);
   }
 

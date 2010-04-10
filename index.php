@@ -67,7 +67,35 @@ if(!isset($_SESSION['openid'])) {
   echo "<h1>Login to CampFireManager for {$Camp_DB->config['event_title']}</h1>";
   if(isset($err)) {echo '<div id="verify-form" class="error">'.$err.'</div>';}
   if(isset($_GET['reason'])) {echo '<div id="verify-form" class="error">Reason: ' . $_GET['reason'] . '</div>';}
-  echo '<div id="verify-form"><form method="get" action="try_auth.php">Please enter your OpenID provider, or just click "Verify" to use your Google account: <input type="hidden" name="action" value="verify" /><input type="text" name="openid_identifier" size="50" value="https://www.google.com/accounts/o8/id" /><input type="submit" value="Verify" /></form></div>';
+  echo '<div id="verify-form"><table width="100%"><tr>
+  <td>Please select your OpenID provider from these icons:
+    <table width="100%">
+      <tr>
+        <td>
+          <form method="get" action="try_auth.php">
+            <input type="hidden" name="action" value="verify" />
+            <input type="hidden" name="openid_identifier" value="https://www.google.com/accounts/o8/id" />
+            <input type="image" src="images/google.png" />
+          </form>
+        </td>
+        <td>
+          <form method="get" action="try_auth.php">
+            <input type="hidden" name="action" value="verify" />
+            <input type="hidden" name="openid_identifier" value="https://www.yahoo.com" />
+            <input type="image" src="images/yahoo.png" />
+          </form>
+        </td>
+        <td>
+          <form method="get" action="try_auth.php">
+            <input type="hidden" name="action" value="verify" />
+            <input type="hidden" name="openid_identifier" value="http://api.myspace.com/openid" />
+            <input type="image" src="images/myspace.png" />
+          </form>
+        </td>
+      </tr>
+    </table>
+  </td>
+  <td>Or enter your own below:<br /><form method="get" action="try_auth.php"><input type="hidden" name="action" value="verify" /><input type="text" name="openid_identifier" size="25" value="" /><input type="submit" value="Log in" /></form></td></tr></table></div>';
   echo "<div class=\"EventDetails\">{$Camp_DB->config['AboutTheEvent']}</div>";
 } else {
   $Camp_DB->getMe(array('OpenID'=>$_SESSION['openid'], 'OpenID_Name'=>$_SESSION['name'], 'OpenID_Mail'=>$_SESSION['email']));
@@ -75,11 +103,26 @@ if(!isset($_SESSION['openid'])) {
   switch($_REQUEST['state']) {
     case "O":
       $arrAuthString=$Camp_DB->getAuthStrings();
+      $phones=$Camp_DB->getPhones();
+      $omb=$Camp_DB->getMicroBloggingAccounts();
+      $phone_numbers='';
+      foreach($phones as $phone) {
+        if($phone_numbers!='') {$phone_numbers.=", ";}
+        $phone_numbers.="{$phone['strNumber']}";
+      }
+      $omb_accounts='';
+      foreach($omb as $omb_ac) {
+        if($omb_accounts!='') {$omb_accounts.=", ";}
+        $omb_server=
+        $omb_accounts.="@{$omb_ac['strAccount']} on " . parse_url($omb_ac['strApiBase'], PHP_URL_HOST);
+      }
       echo "\r\n<form method=\"post\" action=\"$baseurl\" class=\"DrawAttention\">\r\n<input type=\"hidden\" name=\"state\" value=\"Oa\">Please send the following to ";
-      if($phone_numbers!='') {echo "the best mobile number above";}
-      if($phone_numbers!='' and $omb_accounts!='') {echo " or ";}
-      if($omb_accounts!='') {echo "your preferred microblogging account above by direct message";}
-      echo ":\r\n{$arrAuthString[$intPersonID]}<br />\r\nAlternatively, please enter your Auth String into this box:<input type=\"text\" size=\"50\" name=\"AuthString\" />\r\n<input type=\"submit\" value=\"Go\"/> <a href=\"$baseurl\">Or, click here if you changed your mind.</a>\r\n</form>";
+      if(count($phones)==1) {echo "this number ($phone_numbers)";}
+      if(count($phones)>1) {echo "one of these numbers ($phone_numbers)";}
+      if(count($phones)>0 and count($omb)>0) {echo " or ";}
+      if(count($omb)==1) {echo "$omb_accounts by direct message";}
+      if(count($omb)>1) {echo "your preferred microblogging account (from $omb_accounts by) direct message";}
+      echo ":\r\n" . $Camp_DB->getAuthCode() . "<br />\r\nAlternatively, please enter your Auth String into this box:<input type=\"text\" size=\"50\" name=\"AuthString\" />\r\n<input type=\"submit\" value=\"Go\"/> <a href=\"$baseurl\">Or, click here if you changed your mind.</a>\r\n</form>";
       break;
     case "Oa":
       echo "<p class=\"RespondToAction\">Adding an Authorization String to your account</p>\r\n";
@@ -134,6 +177,7 @@ if(!isset($_SESSION['openid'])) {
   }
   $Camp_DB->refresh();
   echo "<div class=\"MenuBar\">\r\n<a href=\"$baseurl\" class=\"HideWithJS\">Reload this static page</a><span class=\"HideWithJS\"> |\r\n</span><a href=\"$baseurl?state=logout\">Log out</a> |\r\n <a href=\"$baseurl?state=O\">Add other access methods</a> |\r\n <a href=\"$baseurl?state=I\">Amend contact details</a> |\r\n <a href=\"{$baseurl}ical/\">ical</a> ";
+  if($Camp_DB->checkSupport()!=0 or $Camp_DB->checkAdmin()!=0) {echo "|\r\n <a href=\"{$baseurl}support/\">Provide support to attendees</a>";}
   if($Camp_DB->checkAdmin()!=0) {echo "|\r\n <a href=\"{$baseurl}admin.php\">Modify config values</a>";}
   echo "\r\n</div>\r\n";
   echo '  <div id="mainbody" class="mainbody">' . $Camp_DB->getTimetableTemplate(FALSE, TRUE). '</div>

@@ -14,6 +14,8 @@
 session_start();
 if(isset($_SESSION['redirect'])) {unset($_SESSION['redirect']);}
 require_once("db.php");
+if(!isset($Camp_DB->config['adminkey'])) {$Camp_DB->generateNewAdminKey();}
+if(!isset($Camp_DB->config['supportkey'])) {$Camp_DB->generateNewSupportKey();}
 // You're only allowed here if you've already logged in
 if(!isset($_SESSION['openid'])) {
   $_SESSION['redirect']='admin.php';
@@ -59,15 +61,16 @@ if($Camp_DB->getAdmins()==0) { // If there's no-one here yet, you get it by defa
   echo "<html>
 <head>
 <title>{$Camp_DB->config['event_title']}</title>
-</head>
 <link rel=\"stylesheet\" type=\"text/css\" href=\"common_style.php\" />
+</head>
 <body>
 <form method=\"post\" action=\"{$baseurl}admin.php\" class=\"WholeDay\">
 <input type=\"hidden\" name=\"update_config\" value=\"TRUE\">
 <table>
   <tr><td><a href=\"$baseurl\" class=\"Label\">Back to main screen</a></td><td class=\"right\"><a href=\"{$baseurl}joind_in.php\" class=\"Label\">Joind.in XML file</a></td></tr>
   <tr><th colspan=\"2\">Admin Console for Config Options (empty boxes will unset those values in the database)</th></tr>
-  <tr><td class=\"Label\">AdminKey</td><td class=\"Data\">{$Camp_DB->config['adminkey']}</td></tr>
+  <tr><td class=\"Label\">Next Admin Key (note: each use will change this value)</td><td class=\"Data\">{$Camp_DB->config['adminkey']}</td></tr>
+  <tr><td class=\"Label\">Next Support Key (note: each use will change this value)</td><td class=\"Data\">{$Camp_DB->config['supportkey']}</td></tr>
   <tr><td class=\"Label\">Lunch Time</td><td class=\"Data\"><select name=\"lunch\">";
   foreach($Camp_DB->times as $time=>$description) {
     if($Camp_DB->config['lunch']==$time) {

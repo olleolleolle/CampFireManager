@@ -1,4 +1,16 @@
 <?php 
+/*******************************************************
+ * CampFireManager
+ * Public facing Mobile web page
+ * Version 0.5 2010-03-19 JonTheNiceGuy
+ *******************************************************
+ * Version History
+ * 0.5 2010-03-19 Migrated from personal SVN store
+ * at http://spriggs.org.uk/jon_code/CampFireManager
+ * where all prior versions are stored to Google Code at
+ * http://code.google.com/p/campfiremanager/
+ ******************************************************/
+
 session_start();
 if(isset($_SESSION['redirect'])) {unset($_SESSION['redirect']);}
 if(!isset($_SESSION['openid']) and isset($_GET['login'])) {
