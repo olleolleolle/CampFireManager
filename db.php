@@ -23,9 +23,9 @@ $db_CampFire=array(
 );
 $db_Phone=array(
   "host"=>"localhost", 
-  "user"=>"gammu_smsd", 
-  "pass"=>"gammu_smsd", 
-  "base"=>"gammu_smsd"
+  "user"=>"gammu", 
+  "pass"=>"gammu", 
+  "base"=>"gammu"
 );
 
 //Load class files
