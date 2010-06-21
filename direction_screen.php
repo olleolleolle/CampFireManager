@@ -27,7 +27,7 @@ if(isset($_GET['setroomdir']) AND $_GET['roomno']+0>0 AND array_search($_GET['ro
 ?><html>
 <head>
 <title><?php echo $Camp_DB->config['event_title']; ?></title>
-<script type="text/javascript" src="external/jquery-1.4.1.min.js"></script>
+<script type="text/javascript" src="external/jquery-1.4.2.min.js"></script>
 <script type="text/javascript" src="external/jquery.marquee.js"></script>
 <script type="text/javascript" src="external/jquery.clock.js"></script>
 <link rel="stylesheet" type="text/css" href="common_style.php" />

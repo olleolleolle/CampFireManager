@@ -30,7 +30,7 @@ $contact_fields=array('mailto', 'twitter', 'linkedin', 'identica', 'statusnet', 
   <head>
   <title><?php echo $Camp_DB->config['event_title']; ?></title>
   <link rel="stylesheet" type="text/css" href="common_style.php" />
-  <script type="text/javascript" src="external/jquery-1.4.1.min.js"></script>
+  <script type="text/javascript" src="external/jquery-1.4.2.min.js"></script>
   <script type="text/javascript" src="external/jquery.marquee.js"></script>
   <?php $xajax->printJavascript(); ?>
 

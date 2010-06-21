@@ -24,7 +24,7 @@ require_once("{$base_dir}common_xajax.php");
 <head><title><?php echo $Camp_DB->config['event_title']; ?></title>
 <link rel="stylesheet" type="text/css" href="common_style.php" />
 <style type="text/css">.Contact {display:none;}</style>
-<script type="text/javascript" src="external/jquery-1.4.1.min.js"></script>
+<script type="text/javascript" src="external/jquery-1.4.2.min.js"></script>
 <script type="text/javascript" src="external/jquery.marquee.js"></script>
 <script type="text/javascript" src="external/jquery.clock.js"></script>
 <?php $xajax->printJavascript(); ?>
