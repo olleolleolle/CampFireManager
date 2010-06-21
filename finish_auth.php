@@ -46,4 +46,3 @@ if ($response->status == Auth_OpenID_CANCEL) {
   header("Location: $baseurl");
 }
 
-?>

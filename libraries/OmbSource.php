@@ -283,4 +283,3 @@ abstract class GetBaseAPI extends GenericBaseClass {
   }
 }
 
-?>

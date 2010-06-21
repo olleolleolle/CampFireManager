@@ -23,4 +23,3 @@ abstract class ProcessingSources extends GenericBaseClass {
   }
 }
 
-?>

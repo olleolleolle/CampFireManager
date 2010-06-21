@@ -50,4 +50,3 @@ if(count($Camp_DB->arrTalks)>0) {
   }
 }
 $vcal->returnCalendar();
-?>

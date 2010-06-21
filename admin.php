@@ -165,4 +165,3 @@ if($Camp_DB->getAdmins()==0) { // If there's no-one here yet, you get it by defa
   header("Location: $baseurl");
 }
 
-?>
