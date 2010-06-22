@@ -110,4 +110,3 @@ class Auth_OpenID_DiffieHellman {
     }
 }
 
-?>

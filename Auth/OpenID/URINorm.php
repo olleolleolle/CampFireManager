@@ -246,4 +246,3 @@ function Auth_OpenID_urinorm($uri)
     return $scheme . '://' . $authority . $path . $query . $fragment;
 }
 
-?>

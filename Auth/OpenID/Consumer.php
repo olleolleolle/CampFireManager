@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This module documents the main interface with the OpenID consumer
  * library.  The only part of the library which has to be used and
@@ -156,6 +155,7 @@
  * @copyright 2005-2008 Janrain, Inc.
  * @license http://www.apache.org/licenses/LICENSE-2.0 Apache
  */
+
 
 /**
  * Require utility classes and functions for the consumer.
@@ -2231,4 +2231,3 @@ class Auth_OpenID_SetupNeededResponse extends Auth_OpenID_ConsumerResponse {
     }
 }
 
-?>

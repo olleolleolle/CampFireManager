@@ -206,7 +206,7 @@ class Auth_OpenID_Association {
      * @param string $assoc_s Association as serialized by serialize()
      * @return Auth_OpenID_Association $result instance of this class
      */
-    function deserialize($class_name, $assoc_s)
+    public static function deserialize($class_name, $assoc_s)
     {
         $pairs = Auth_OpenID_KVForm::toArray($assoc_s, $strict = true);
         $keys = array();
@@ -610,4 +610,3 @@ class Auth_OpenID_SessionNegotiator {
     }
 }
 
-?>

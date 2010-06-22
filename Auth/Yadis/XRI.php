@@ -231,4 +231,3 @@ function Auth_Yadis_getCanonicalID($iname, $xrds)
     return $canonicalID;
 }
 
-?>

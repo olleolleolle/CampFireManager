@@ -30,6 +30,7 @@ require_once "Auth/Yadis/ParanoidHTTPFetcher.php";
 require_once "Auth/OpenID/BigMath.php";
 require_once "Auth/OpenID/URINorm.php";
 
+
 /**
  * Status code returned by the server when the only option is to show
  * an error page, since we do not have enough information to redirect
@@ -102,9 +103,12 @@ define('Auth_OpenID_digits',
 define('Auth_OpenID_punct',
        "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
 
-if (Auth_OpenID_getMathLib() === null) {
-    Auth_OpenID_setNoMathSupport();
-}
+Auth_OpenID_setNoMathSupport();
+
+// if (Auth_OpenID_getMathLib() === null) {
+//     Auth_OpenID_setNoMathSupport();
+// }
+
 
 /**
  * The OpenID utility function class.
@@ -120,7 +124,7 @@ class Auth_OpenID {
      *
      * @access private
      */
-    function isFailure($thing)
+    public static function isFailure($thing)
     {
         return is_a($thing, 'Auth_OpenID_FailureResponse');
     }
@@ -141,7 +145,7 @@ class Auth_OpenID {
      *
      * @access private
      */
-    function getQuery($query_str=null)
+    public static function getQuery($query_str=null)
     {
         $data = array();
 
@@ -177,7 +181,7 @@ class Auth_OpenID {
         return $data;
     }
 
-    function params_from_string($str)
+    public static function params_from_string($str)
     {
         $chunks = explode("&", $str);
 
@@ -203,7 +207,7 @@ class Auth_OpenID {
      *
      * @access private
      */
-    function ensureDir($dir_name)
+    public static function ensureDir($dir_name)
     {
         if (is_dir($dir_name) || @mkdir($dir_name)) {
             return true;
@@ -225,7 +229,7 @@ class Auth_OpenID {
      *
      * @access private
      */
-    function addPrefix($values, $prefix)
+    public static function addPrefix($values, $prefix)
     {
         $new_values = array();
         foreach ($values as $s) {
@@ -241,7 +245,7 @@ class Auth_OpenID {
      *
      * @access private
      */
-    function arrayGet($arr, $key, $fallback = null)
+    public static function arrayGet($arr, $key, $fallback = null)
     {
         if (is_array($arr)) {
             if (array_key_exists($key, $arr)) {
@@ -261,7 +265,7 @@ class Auth_OpenID {
     /**
      * Replacement for PHP's broken parse_str.
      */
-    function parse_str($query)
+    public static function parse_str($query)
     {
         if ($query === null) {
             return null;
@@ -295,7 +299,7 @@ class Auth_OpenID {
      * pairs from $data into a URL query string
      * (e.g. "username=bob&id=56").
      */
-    function httpBuildQuery($data)
+    public static function httpBuildQuery($data)
     {
         $pairs = array();
         foreach ($data as $key => $value) {
@@ -323,7 +327,7 @@ class Auth_OpenID {
      * @return string $url The original URL with the new parameters added.
      *
      */
-    function appendArgs($url, $args)
+    public static function appendArgs($url, $args)
     {
         if (count($args) == 0) {
             return $url;
@@ -412,7 +416,7 @@ class Auth_OpenID {
      * @return mixed $new_url The URL after normalization, or null if
      * $url was malformed.
      */
-    function normalizeUrl($url)
+    public static function normalizeUrl($url)
     {
         @$parsed = parse_url($url);
 
@@ -443,7 +447,7 @@ class Auth_OpenID {
      *
      * @access private
      */
-    function intval($value)
+    public static function intval($value)
     {
         $re = "/^\\d+$/";
 
@@ -461,7 +465,7 @@ class Auth_OpenID {
      * @param string $str The string of bytes to count.
      * @return int The number of bytes in $str.
      */
-    function bytes($str)
+    public static function bytes($str)
     {
         return strlen(bin2hex($str)) / 2;
     }
@@ -470,7 +474,7 @@ class Auth_OpenID {
      * Get the bytes in a string independently of multibyte support
      * conditions.
      */
-    function toBytes($str)
+    public static function toBytes($str)
     {
         $hex = bin2hex($str);
 
@@ -486,7 +490,7 @@ class Auth_OpenID {
         return $b;
     }
 
-    function urldefrag($url)
+    public static function urldefrag($url)
     {
         $parts = explode("#", $url, 2);
 
@@ -497,7 +501,7 @@ class Auth_OpenID {
         }
     }
 
-    function filter($callback, &$sequence)
+    public static function filter($callback, &$sequence)
     {
         $result = array();
 
@@ -549,4 +553,3 @@ class Auth_OpenID {
                "</html>");
     }
 }
-?>
