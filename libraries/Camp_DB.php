@@ -24,15 +24,15 @@ class Camp_DB extends GenericBaseClass {
 
   protected $today;
 
-  public $arrTalks=array();
-  public $arrTalkSlots=array();
-  public $arrTimeEndPoints=array();
+  public $arrTalks = array();
+  public $arrTalkSlots = array();
+  public $arrTimeEndPoints = array();
 
-  public $contact_fields=array('mailto', 'twitter', 'linkedin', 'identica', 'statusnet', 'facebook', 'irc', 'http', 'https');
+  public $contact_fields = array('mailto', 'twitter', 'linkedin', 'identica', 'statusnet', 'facebook', 'irc', 'http', 'https');
 
-  public $times=array();
-  public $rooms=array();
-  public $config=array();
+  public $times = array();
+  public $rooms = array();
+  public $config = array();
 
   // Calculated Data
   public $now_time;
@@ -41,7 +41,9 @@ class Camp_DB extends GenericBaseClass {
   function __construct($db_host, $db_user, $db_pass, $db_base, $db_prefix, $arrAuthDetails=array(), $debug=0) {
     parent::__construct($db_host, $db_user, $db_pass, $db_base, $db_prefix, $debug);
     $this->refresh();
-    if(count($arrAuthDetails)==1) {$this->getMe($arrAuthDetails);}
+    if(count($arrAuthDetails)==1) {
+      $this->getMe($arrAuthDetails);
+    }
   }
 
   function collectWholeEventData() {
@@ -50,36 +52,44 @@ class Camp_DB extends GenericBaseClass {
   }
 
   function refresh() {
-    $this->today=date("Y-m-d");
-    $this->times=$this->getTimes();
-    $this->rooms=$this->getRooms();
-    $this->config=$this->getConfig();
-    if(!isset($this->config['event_start']) OR $this->config['event_start']=='') {$this->config['event_start']=$this->today;}
-    if(!isset($this->config['event_end']) OR $this->config['event_end']=='') {$this->config['event_end']=$this->today;}
-    $now_and_next=$this->getNowAndNextTime();
-    $this->now_time=$now_and_next['now'];
-    $this->next_time=$now_and_next['next'];
-    list($this->arrTalkSlots, $this->arrTalks)=$this->readTalkData();
-    if(isset($this->intPersonID)) {$this->getMe();}
+    $this->today = date("Y-m-d");
+    $this->times = $this->getTimes();
+    $this->rooms = $this->getRooms();
+    $this->config = $this->getConfig();
+    if(!isset($this->config['event_start']) OR $this->config['event_start']=='') {
+      $this->config['event_start'] = $this->today;
+    }
+    if(!isset($this->config['event_end']) OR $this->config['event_end']=='') {
+      $this->config['event_end'] = $this->today;
+    }
+    $now_and_next = $this->getNowAndNextTime();
+    $this->now_time = $now_and_next['now'];
+    $this->next_time = $now_and_next['next'];
+    list($this->arrTalkSlots, $this->arrTalks) = $this->readTalkData();
+    if(isset($this->intPersonID)) {
+      $this->getMe();
+    }
   }
 
   function getNowAndNextTime($offset='') {
     $this->doDebug("getNowAndNextTime('$offset');");
     $this->makeTimeArray();
-    if($offset=='') {$now_time=strtotime('Now');} else {$now_time=strtotime($offset);}
+    $now_time = ($offset==='') ? strtotime('Now') : strtotime($offset);
 
     // Find the "Now" and "Next" time blocks
-    $now=0;
-    $next='';
-    foreach($this->times as $time=>$timestring) {
-      $intTime=strtotime(date("Y-m-d ") . $this->arrTimeEndPoints[$time]['s']);
-      if($intTime<$now_time) {$now=$time;}
-      if($intTime>=$now_time) {
-        $next=$time;
+    $now = 0;
+    $next = '';
+    foreach($this->times as $time => $timestring) {
+      $intTime = strtotime(date("Y-m-d ") . $this->arrTimeEndPoints[$time]['s']);
+      if ($intTime < $now_time) {
+        $now = $time;
+      }
+      if ($intTime >= $now_time) {
+        $next = $time;
         break;
       }
     }
-    return(array('now'=>$now, 'next'=>$next));
+    return array('now'=>$now, 'next'=>$next);
   }
 
   function makeTimeArray() {
@@ -213,7 +223,9 @@ class Camp_DB extends GenericBaseClass {
     }
   }
 
-  function getAuthStrings() {return($this->qryMap('intPersonID', 'strAuthString', "people WHERE intPersonID='{$this->intPersonID}' AND strAuthString!=''"));}
+  function getAuthStrings() {
+    return $this->qryMap('intPersonID', 'strAuthString', "people WHERE intPersonID='{$this->intPersonID}' AND strAuthString!=''");
+  }
 
   function fixTalk($intTalkID) {
     $this->doDebug("fixTalk($intTalkID);");
@@ -257,12 +269,13 @@ class Camp_DB extends GenericBaseClass {
 
   function setConfig($key, $value) {
     $this->doDebug("setConfig($key, $value);");
-    if($this->config[$key]!=$value) {
-      $key=$this->escape($key);
-      $value=$this->escape($value);
-      if($this->config[$key]=='' AND $value!='') {$this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}config (strConfig, strValue) VALUES ('$key', '$value')");}
-      if($this->config[$key]!='' AND $value!='') {$this->boolUpdateOrInsertSql("UPDATE config SET strValue='$value' WHERE strConfig='$key'");}
-      if($this->config[$key]!='' AND $value=='') {$this->boolUpdateOrInsertSql("DELETE FROM config WHERE strConfig='$key'");}
+    $val = CampUtils::arrayGet($this->config, $key, '');
+    if($val != $value) {
+      $key = $this->escape($key);
+      $value = $this->escape($value);
+      if($val=='' AND $value!='') {$this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}config (strConfig, strValue) VALUES ('$key', '$value')");}
+      if($val!='' AND $value!='') {$this->boolUpdateOrInsertSql("UPDATE config SET strValue='$value' WHERE strConfig='$key'");}
+      if($val!='' AND $value=='') {$this->boolUpdateOrInsertSql("DELETE FROM config WHERE strConfig='$key'");}
     }
   }
 
@@ -279,10 +292,12 @@ class Camp_DB extends GenericBaseClass {
   }
 
   function updateRoom($intRoomID, $strRoom, $intCapacity) {
+    error_log('>>>>>>>>>>>>>>>>'. $intRoomID . '/'. $strRoom .'/'. $intCapacity);
     $this->doDebug("updateRoom($intRoomID, $strRoom, $intCapacity);");
     if(!isset($this->rooms[$intRoomID]) AND $strRoom!='' AND $intCapacity!='') {
       $this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}rooms (strRoom, intCapacity) VALUES ('$strRoom', '$intCapacity')");
     }
+    
     if($this->rooms[$intRoomID]['strRoom']!=$strRoom AND $strRoom!='' AND $this->rooms[$intRoomID]['intRoom']!=$intCapacity AND $intCapacity!='') {
       $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}rooms SET strRoom='$strRoom', intCapacity='$intCapacity' WHERE intRoomID='$intRoomID'");
     }
@@ -334,7 +349,7 @@ class Camp_DB extends GenericBaseClass {
 
   function getConfig() {
     $this->doDebug("getConfig();");
-    return($this->qryMap('strConfig', 'strValue', "{$this->prefix}config"));
+    return $this->qryMap('strConfig', 'strValue', "{$this->prefix}config");
   }
 
   function generateNewAdminKey() {
@@ -370,21 +385,20 @@ class Camp_DB extends GenericBaseClass {
       $omb_accounts.="@{$omb_ac['strAccount']} on " . parse_url($omb_ac['strApiBase'], PHP_URL_HOST);
     }
     
-    if(isset($this->config['website'])) {$website=$this->config['website'];} else {$website='';}
-    $return=array('tel'=>$phone_numbers, 'omb'=>$omb_accounts, 'web'=>$website);
-    return($return);
+    $website = CampUtils::arrayGet($this->config, 'website', '');
+    return array('tel'=>$phone_numbers, 'omb'=>$omb_accounts, 'web'=>$website);
   }
 
   function getMicroBloggingAccounts() {
     $this->doDebug("getMicroBloggingAccounts();");
-    return($this->qryArray("SELECT * FROM {$this->prefix}account_microblog", 'intMbID'));
+    return $this->qryArray("SELECT * FROM {$this->prefix}account_microblog", 'intMbID');
   }
 
   function getLastMbUpdate($intMbID) {
     $this->doDebug("getLastMbUpdate($intMbID);");
-    $return=$this->qryMap('intMbID', 'intLastMessage', "{$this->prefix}account_microblog WHERE intMbID='$intMbID'");
+    $return = $this->qryMap('intMbID', 'intLastMessage', "{$this->prefix}account_microblog WHERE intMbID='$intMbID'");
     $this->doDebug("Returns: " . $return[$intMbID] . "");
-    return($return[$intMbID]);
+    return $return[$intMbID];
   }
 
   function setLastMbUpdate($intMbID, $intLastMessage) {
@@ -394,12 +408,12 @@ class Camp_DB extends GenericBaseClass {
 
   function getPhones() {
     $this->doDebug("getPhones();");
-    return($this->qryArray("SELECT * FROM {$this->prefix}account_phones", 'intPhoneID'));
+    return $this->qryArray("SELECT * FROM {$this->prefix}account_phones", 'intPhoneID');
   }
 
   function getPeople() {
     $this->doDebug("getPeople();");
-    return($this->qryArray("SELECT * FROM {$this->prefix}people", 'intPersonID'));
+    return $this->qryArray("SELECT * FROM {$this->prefix}people", 'intPersonID');
   }
 
   function getPerson($s=array()) {
@@ -414,38 +428,38 @@ class Camp_DB extends GenericBaseClass {
         $w.="$key='" . $this->escape($value) . "'";
       }
     }
-    return($this->qryArray("SELECT * FROM {$this->prefix}people WHERE $w", 'intPersonID'));
+    return $this->qryArray("SELECT * FROM {$this->prefix}people WHERE $w", 'intPersonID');
   }
 
   function getRooms() {
     $this->doDebug("getRooms();");
-    return($this->qryArray("SELECT * FROM {$this->prefix}rooms", 'intRoomID'));
+    return $this->qryArray("SELECT * FROM {$this->prefix}rooms", 'intRoomID');
   }
 
   function getTimes() {
     $this->doDebug("getTimes();");
-    return($this->qryMap('intTimeID', 'strTime', "{$this->prefix}times"));
+    return $this->qryMap('intTimeID', 'strTime', "{$this->prefix}times");
   }
 
   function getTalks() {
     $this->doDebug("getTalks();");
     if($this->today!='') {$w="WHERE datTalk='{$this->today}'";} else {$w='';}
-    return($this->qryArray("SELECT * FROM {$this->prefix}talks $w", "intTalkID"));
+    return $this->qryArray("SELECT * FROM {$this->prefix}talks $w", "intTalkID");
   }
 
   function getAttendeesCount() {
     $this->doDebug("getAttendeesCount();");
-    return($this->qryMap('intTalkID', 'count(intPersonID)', "{$this->prefix}attendees"));
+    return $this->qryMap('intTalkID', 'count(intPersonID)', "{$this->prefix}attendees");
   }
 
   function getAttendees() {
     $this->doDebug("getAttendees();");
-    return($this->qryArray("SELECT * from {$this->prefix}attendees", 'intAttendID'));
+    return $this->qryArray("SELECT * from {$this->prefix}attendees", 'intAttendID');
   }
 
   function getTalksIAmAttending() {
     $this->doDebug("getTalksIAmAttending();");
-    return($this->qryMap('intTalkID', 'intAttendID', "{$this->prefix}attendees WHERE intPersonID='{$this->intPersonID}'"));
+    return $this->qryMap('intTalkID', 'intAttendID', "{$this->prefix}attendees WHERE intPersonID='{$this->intPersonID}'");
   }
 
   function getMyTalks() {
@@ -456,12 +470,12 @@ class Camp_DB extends GenericBaseClass {
         $return[$intTalkID]=TRUE;
       }
     }
-    return($return);
+    return $return;
   }
 
   function getPresenters() {
     $this->doDebug("getPresenters();");
-    return($this->qryArray("SELECT {$this->prefix}people.intPersonID, {$this->prefix}people.strName, {$this->prefix}people.strContactInfo FROM {$this->prefix}people, {$this->prefix}talks WHERE {$this->prefix}talks.intPersonID={$this->prefix}people.intPersonID", 'intPersonID'));
+    return $this->qryArray("SELECT {$this->prefix}people.intPersonID, {$this->prefix}people.strName, {$this->prefix}people.strContactInfo FROM {$this->prefix}people, {$this->prefix}talks WHERE {$this->prefix}talks.intPersonID={$this->prefix}people.intPersonID", 'intPersonID');
   }
 
   function getScreens() {
@@ -495,7 +509,7 @@ class Camp_DB extends GenericBaseClass {
   function getDirections() {
     $this->doDebug("getDirections();");
     $this->getScreens();
-    return($this->qryMap('intDestRoomID', 'intDirectionURDL', "{$this->prefix}room_directions WHERE intScreenID='{$this->intScreenID}'"));
+    return $this->qryMap('intDestRoomID', 'intDirectionURDL', "{$this->prefix}room_directions WHERE intScreenID='{$this->intScreenID}'");
   }
 
   function editTalk($commands) {
@@ -549,7 +563,7 @@ class Camp_DB extends GenericBaseClass {
 
   function showStatusScreen($number=50) {
     if($this->intPersonID!='') {$where="intPersonID='{$this->intPersonID}' AND ";} 
-    return($this->qryMap('intUpdateID', 'strMessage', "{$this->prefix}sms_screen WHERE $where datInsert>'" . date("Y-m-d H:i:s", strtotime("-15 minutes")) . "' ORDER BY datInsert DESC", '',  "LIMIT 0, $number"));
+    return $this->qryMap('intUpdateID', 'strMessage', "{$this->prefix}sms_screen WHERE $where datInsert>'" . date("Y-m-d H:i:s", strtotime("-15 minutes")) . "' ORDER BY datInsert DESC", '',  "LIMIT 0, $number");
   }
 
   function attendTalk($intTalkID) {
@@ -716,7 +730,7 @@ class Camp_DB extends GenericBaseClass {
         }
       }
     }
-    return(array($arrTalkSlots, $arrTalks));
+    return array($arrTalkSlots, $arrTalks);
   }
 
   function sortRooms() {
@@ -785,7 +799,7 @@ class Camp_DB extends GenericBaseClass {
   function setSupportUser() {$_SESSION['support_user']=$this->intPersonID;}
   function getAuthCode() {
     $person=$this->getPerson(array('intPersonID'=>$this->intPersonID));
-    return($person[$this->intPersonID]['strAuthString']);
+    return $person[$this->intPersonID]['strAuthString'];
   }
 
   function getContactDetails($intPersonID=0, $asArray=FALSE) {
@@ -860,7 +874,7 @@ class Camp_DB extends GenericBaseClass {
       }
     }
     if($asArray==TRUE) {$return['strName']=$people[$intPersonID]['strName'];}
-    return($return);
+    return $return;
   }
 
   function updateIdentityInfo($commands) {
@@ -920,12 +934,12 @@ class Camp_DB extends GenericBaseClass {
     $this->doDebug("fixRooms()");
     if(isset($this->config['FixRoomOffset'])) {$offset=$this->config['FixRoomOffset'];} else {$offset="-15 minutes";}
     $now_and_next=$this->getNowAndNextTime($offset);
-    return($this->_fixRooms($now_and_next['now']));
+    return $this->_fixRooms($now_and_next['now']);
   }
 
   protected function _fixRooms($now_time) {
     $this->doDebug("_fixRooms()");
-    return($this->boolUpdateOrInsertSql("UPDATE {$this->prefix}talks SET boolFixed=1 WHERE intTimeID<='$now_time'"));
+    return $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}talks SET boolFixed=1 WHERE intTimeID<='$now_time'");
   }
 
   protected function _setAdmin() {
@@ -946,9 +960,9 @@ class Camp_DB extends GenericBaseClass {
 
   function allMyDetails() {
     $this->doDebug("allMyDetails()");
-    $me=$this->getPerson(array('intPersonID'=>$this->intPersonID));
+    $me = $this->getPerson(array('intPersonID'=>$this->intPersonID));
     foreach($me as $person) {}
-    return($person);
+    return $person;
   }
 
   function _mergeContactDetails($arrContacts) {
@@ -1187,6 +1201,6 @@ class Camp_DB extends GenericBaseClass {
           break;
       }
     }
-    return($d);
+    return $d;
   }
 }

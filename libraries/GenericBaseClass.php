@@ -16,15 +16,25 @@ abstract class GenericBaseClass {
     $this->doDebug("New " . get_class($this) . "($db_host, $db_user, $db_pass, $db_base, $db_prefix, $debug)");
     $this->resource = mysql_connect($db_host, $db_user, $db_pass);
     mysql_select_db($db_base, $this->resource);
-    if($db_prefix!='') {$this->prefix=$db_prefix . '_';}
+    if($db_prefix!='') {
+      $this->prefix=$db_prefix . '_';
+    }
 
   }
 
   function setDebug($state=0) {
-    $this->_intDebug=$state;
+    $this->_intDebug = $state;
   }
 
-  function doDebug($message, $level=1) {if($this->_intDebug>=$level) {if(isset($_SERVER['SERVER_NAME'])) {echo "<!-- DBG: $message -->\r\n";} else {echo get_class($this) . " - " . date("H:i:s - ") . $message . "\r\n";}}}
+  function doDebug($message, $level=1) {
+    if($this->_intDebug>=$level) {
+      if(isset($_SERVER['SERVER_NAME'])) {
+        echo "<!-- DBG: $message -->\r\n";
+      } else {
+        echo get_class($this) . " - " . date("H:i:s - ") . $message . "\r\n";
+      }
+    }
+  }
 
   //Perform an SQL Query and return an array of the results
   function qryArray($sql, $index='') {

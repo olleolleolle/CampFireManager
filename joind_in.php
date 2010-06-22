@@ -19,10 +19,14 @@ foreach($Camp_DB->times as $intTimeID=>$strTime) {
   if($intTimeID<$min_time) {$min_time=$intTimeID;}
   if($intTimeID>$max_time) {$max_time=$intTimeID;}
 }
+
+$event_title = CampUtils::arrayGet($Camp_DB->config, 'event_title', '');
+$event_start = CampUtils::arrayGet($Camp_DB->config, 'event_start', '');
+
 echo '<?xml version="1.0" encoding="UTF-8"?>' . "\r\n"; ?>
 <event>
-  <event_title><?php echo $Camp_DB->config['event_title']; ?></event_title>
-  <event_start_date><?php echo $Camp_DB->config['event_start'] . "T" . $Camp_DB->arrTimeEndPoints[$min_time]['s'] . $Camp_DB->config['UTCOffset']; ?></event_start_date>
+  <event_title><?php echo $event_title; ?></event_title>
+  <event_start_date><?php echo $event_start . "T" . $Camp_DB->arrTimeEndPoints[$min_time]['s'] . $Camp_DB->config['UTCOffset']; ?></event_start_date>
   <event_end_date><?php echo $Camp_DB->config['event_end'] . "T" . $Camp_DB->arrTimeEndPoints[$max_time]['e'] . $Camp_DB->config['UTCOffset']; ?></event_end_date>
   <event_desc><?php echo $Camp_DB->config['AboutTheEvent']; ?></event_desc>
 <?php
