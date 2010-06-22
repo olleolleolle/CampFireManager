@@ -14,16 +14,19 @@
 
 $baseurl=calculateBaseURL();
 function calculateBaseURL() {
-  if($_SERVER['https'] == 1) {
-    $scheme="https";
+  $port = '';
+  $scheme = 'http';
+  if( array_key_exists('https', $_SERVER) && $_SERVER['https']  == 1) {
+    $scheme = "https";
+    if( $_SERVER['SERVER_PORT'] != 443) {
+        $port = ":" . $_SERVER['SERVER_PORT'];
+    }
+  } elseif (array_key_exists('https', $_SERVER) &&  $_SERVER['https'] == 'on') {
+    $scheme = "https";
     if($_SERVER['SERVER_PORT']!=443) {$port=":" . $_SERVER['SERVER_PORT'];}
-  } elseif ($_SERVER['https'] == 'on') {
-    $scheme="https";
-    if($_SERVER['SERVER_PORT']!=443) {$port=":" . $_SERVER['SERVER_PORT'];}
-  } elseif ($_SERVER['SERVER_PORT']==443) {
+  } elseif ($_SERVER['SERVER_PORT'] == 443) {
     $scheme="https";
   } else {
-    $scheme="http";
     if($_SERVER['SERVER_PORT']!=80) {$port=":" . $_SERVER['SERVER_PORT'];}
   }
   return("$scheme://{$_SERVER['SERVER_NAME']}$port" . dirname($_SERVER['SCRIPT_NAME']) . "/");
