@@ -15,7 +15,8 @@ $__campfire=array();
 // Connect to the databases
 require_once("db.php");
 
-$column_widths=100/count($Camp_DB->times);
+$times = count($Camp_DB->times) ? count($Camp_DB->times) : 100;
+$column_widths= 100/ $times;
 $row_heights=100/(count($Camp_DB->rooms)+1);
 
 ?>
