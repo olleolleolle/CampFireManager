@@ -190,7 +190,7 @@ function Auth_Yadis_getCanonicalID($iname, $xrds)
 
     // Now nodes are in reverse order.
     $xrd_list = array_reverse($xrds->allXrdNodes);
-    $parser =& $xrds->parser;
+    $parser = $xrds->parser;
     $node = $xrd_list[0];
 
     $canonicalID_nodes = $parser->evalXPath('xrd:CanonicalID', $node);
@@ -230,4 +230,5 @@ function Auth_Yadis_getCanonicalID($iname, $xrds)
 
     return $canonicalID;
 }
+
 

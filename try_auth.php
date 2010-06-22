@@ -9,7 +9,6 @@ function getOpenIDURL() {
     // value.
     if (!array_key_exists('openid_identifier', $_GET) || empty($_GET['openid_identifier'])) {
         $err = "Expected an OpenID URL.";
-        error_log($err);
         include 'index.php';
         exit(0);
     }

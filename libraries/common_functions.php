@@ -80,7 +80,7 @@ function genRandStr($minLen, $maxLen, $alphaLower = 1, $alphaUpper = 1, $num = 1
       $str = '';
       $i = 1;
       while ($i <= $strLen) {
-        $rand = rand(0, $count);
+        $rand = rand(0, $count-1);
         $newChar = $finalArray[$rand];
         $str .= $newChar;
         $i++;
@@ -93,7 +93,7 @@ function genRandStr($minLen, $maxLen, $alphaLower = 1, $alphaUpper = 1, $num = 1
         $str = '';
         $i = 1;
         while ($i <= $strLen) {
-          $rand = rand(0, $count);
+          $rand = rand(0, $count-1);
           $newChar = $finalArray[$rand];
           $str .= $newChar;
           $i++;

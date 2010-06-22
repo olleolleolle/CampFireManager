@@ -4,31 +4,30 @@ ini_set('include_path', $path);
 
 function displayError($message) {
     $error = $message;
-    error_log($message);
     include 'index.php';
     exit(0);
 }
 
-/**
- * Require the OpenID consumer code.
- */
-require_once "Auth/OpenID/Consumer.php";
+  /**
+   * Require the OpenID consumer code.
+   */
+  require_once "Auth/OpenID/Consumer.php";
 
-/**
- * Require the "file store" module, which we'll need to store
- * OpenID information.
- */
-require_once "Auth/OpenID/FileStore.php";
+  /**
+   * Require the "file store" module, which we'll need to store
+   * OpenID information.
+   */
+  require_once "Auth/OpenID/FileStore.php";
 
-/**
- * Require the Simple Registration extension API.
- */
-require_once "Auth/OpenID/SReg.php";
+  /**
+   * Require the Simple Registration extension API.
+   */
+  require_once "Auth/OpenID/SReg.php";
 
-/**
- * Require the PAPE extension module.
- */
-require_once "Auth/OpenID/PAPE.php";
+  /**
+   * Require the PAPE extension module.
+   */
+  require_once "Auth/OpenID/PAPE.php";
 
 
 global $pape_policy_uris;
@@ -47,24 +46,26 @@ function getStore() {
      */
     $store_path = "/tmp/_php_consumer_test";
 
-    if (!file_exists($store_path) && !mkdir($store_path)) {
+    if (!file_exists($store_path) &&
+        !mkdir($store_path)) {
         print "Could not create the FileStore directory '$store_path'. ".
             " Please check the effective permissions.";
         exit(0);
     }
     if (!is_writable($store_path)) {
-        exit("Could not write to OpenID store path $store_path. Please check its permissions.");
+        throw new Exception('Please check the effective permissions of tmp storage path '. $store_path);
     }
     return new Auth_OpenID_FileStore($store_path);
 }
 
-function getConsumer() {
+function &getConsumer() {
     /**
      * Create a consumer object using the store object created
      * earlier.
      */
     $store = getStore();
-    return new Auth_OpenID_Consumer($store);
+    $consumer = new Auth_OpenID_Consumer($store);
+    return $consumer;
 }
 
 function getScheme() {
@@ -89,3 +90,4 @@ function getTrustRoot() {
                    dirname($_SERVER['PHP_SELF']));
 }
 
+?>

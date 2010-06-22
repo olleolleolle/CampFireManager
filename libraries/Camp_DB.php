@@ -929,7 +929,7 @@ class Camp_DB extends GenericBaseClass {
   protected function _setAdmin() {
     $this->doDebug("_setAdmin()");
     $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}people SET boolIsAdmin=1 WHERE intPersonID='{$this->intPersonID}'");
-    $this->generateNewAdminKey($resource);
+    $this->generateNewAdminKey($this->resource);
   }
 
   function mergeContactDetails($strAuthString) {
@@ -1013,15 +1013,22 @@ class Camp_DB extends GenericBaseClass {
     $this->doDebug("getTimetableTemplate($includeCountData, $includeProposeLink);");
 
     session_start();
-    if(isset($_SESSION['openid'])) {$this->getMe(array('OpenID'=>$_SESSION['openid'], 'OpenID_Name'=>$_SESSION['name'], 'OpenID_Mail'=>$_SESSION['email']));}
+    if(isset($_SESSION['openid'])) {
+      $dataSet = array(
+        'OpenID'=>$_SESSION['openid'],
+        'OpenID_Name'=> array_key_exists('name', $_SESSION) ? $_SESSION['name'] : 'Unknown', // Check this
+        'OpenID_Mail'=>$_SESSION['email']
+      );
+      $this->getMe($dataSet);
+    }
 
     // Get the talks this person is presenting
     $my_talks=$this->getMyTalks();
     // Get the talks this person is attending
     $attend_talks=$this->getTalksIAmAttending();
-
+    $mainbody = '';
     if(count($this->rooms)>0) {
-      $mainbody="<table class=\"WholeDay\">\r\n";
+      $mainbody .="<table class=\"WholeDay\">\r\n";
       $mainbody.="  <thead>\r\n";
       $mainbody.="    <tr class=\"Time_title\">\r\n";
       foreach($this->times as $intTimeID=>$strTime) {
@@ -1103,7 +1110,7 @@ class Camp_DB extends GenericBaseClass {
       $mainbody.="</tbody>\r\n";
       $mainbody.="</table>\r\n";
     }
-    return($mainbody);
+    return $mainbody;
   }
 
   function getDirectionTemplate() {

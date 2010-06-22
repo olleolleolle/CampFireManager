@@ -106,8 +106,14 @@ if(!isset($_SESSION['openid'])) {
   <td>Or enter your own below:<br /><form method="get" action="try_auth.php"><input type="hidden" name="action" value="verify" /><input type="text" name="openid_identifier" size="25" value="" /><input type="submit" value="Log in" /></form></td></tr></table></div>';
   echo "<div class=\"EventDetails\">$event_details</div>";
 } else {
-  $Camp_DB->getMe(array('OpenID'=>$_SESSION['openid'], 'OpenID_Name'=>$_SESSION['name'], 'OpenID_Mail'=>$_SESSION['email']));
-  echo "<h1 class=\"headerbar\">{$Camp_DB->config['event_title']}</h1>\r\n";
+  $dataSet = array(
+    'OpenID'=> $_SESSION['openid'],
+    'OpenID_Name'=> array_key_exists('name', $_SESSION) ? $_SESSION['name'] : 'Unknown', // Check this
+    'OpenID_Mail' => $_SESSION['email']
+  );
+  $Camp_DB->getMe($dataSet);
+  #$event_title = $Camp_DB->config['event_title']; // Check this
+  echo "<h1 class=\"headerbar\">$event_title</h1>\r\n";
   switch($_REQUEST['state']) {
     case "O":
       $arrAuthString=$Camp_DB->getAuthStrings();

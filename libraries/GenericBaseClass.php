@@ -14,7 +14,7 @@ abstract class GenericBaseClass {
   function __construct($db_host, $db_user, $db_pass, $db_base, $db_prefix='', $debug=0) {
     $this->setDebug($debug);
     $this->doDebug("New " . get_class($this) . "($db_host, $db_user, $db_pass, $db_base, $db_prefix, $debug)");
-    $this->resource=mysql_connect($db_host, $db_user, $db_pass);
+    $this->resource = mysql_connect($db_host, $db_user, $db_pass);
     mysql_select_db($db_base, $this->resource);
     if($db_prefix!='') {$this->prefix=$db_prefix . '_';}
 
@@ -29,7 +29,7 @@ abstract class GenericBaseClass {
   //Perform an SQL Query and return an array of the results
   function qryArray($sql, $index='') {
     $this->doDebug("SQL: ($index) # $sql # ");
-    $query=mysql_query($sql, $this->resource);
+    $query = mysql_query($sql, $this->resource);
     if(mysql_errno($this->resource)>0 OR $query===FALSE) {
       $this->doDebug("ERR: " . mysql_error($this->resource) . "");
       return FALSE;
@@ -49,7 +49,7 @@ abstract class GenericBaseClass {
     if(is_array($group)) {$sql.=" GROUP BY $index";} elseif($group!='') {$sql.=" GROUP BY $group";}
     if($limit!='') {$sql.=" $limit";}
     $this->doDebug("SQL: # $sql # ");
-    $query=mysql_query($sql, $this->resource);
+    $query = mysql_query($sql, $this->resource);
     if(mysql_errno($this->resource)!=0) {
       $this->doDebug("ERR: " . mysql_error($this->resource) . "");
       return FALSE;
