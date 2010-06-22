@@ -35,5 +35,7 @@ require_once("{$base_dir}SmsSource.php");
 require_once("{$base_dir}OmbSource.php");
 
 //Initialize Class
-if(!is_array($__campfire)) {$__campfire=array();}
-$Camp_DB=new Camp_DB($db_CampFire['host'], $db_CampFire['user'], $db_CampFire['pass'], $db_CampFire['base'], $db_CampFire['prefix'], $__campfire, $debug);
+if( !isset($__campfire) || !is_array($__campfire) ) {
+  $__campfire = array();
+}
+$Camp_DB = new Camp_DB($db_CampFire['host'], $db_CampFire['user'], $db_CampFire['pass'], $db_CampFire['base'], $db_CampFire['prefix'], $__campfire, $debug);
