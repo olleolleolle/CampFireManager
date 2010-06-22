@@ -17,7 +17,7 @@ if(file_exists("libraries/GenericBaseClass.php")) {$base_dir='libraries/';} else
 require_once("db.php");
 require_once("{$base_dir}common_functions-template.php");
 require_once("{$base_dir}common_xajax.php");
-
+require_once 'libraries/CampUtils.php';
 // Find the "Now" and "Next" time blocks
 $now_and_next=$Camp_DB->getNowAndNextTime();
 $now=$now_and_next['now'];
@@ -25,7 +25,7 @@ $next=$now_and_next['next'];
 
 $contact_fields=array('mailto', 'twitter', 'linkedin', 'identica', 'statusnet', 'facebook', 'irc', 'http', 'https');
 
-$event_title = array_key_exists('event_title', $Camp_DB->config) ? $Camp_DB->config['event_title'] : 'CampfireDefaultEvent';
+$event_title = CampUtils::arrayGet($Camp_DB->config, 'event_title', 'CampfireDefaultEvent');
 
 ?>
 <html>
@@ -50,11 +50,7 @@ $event_title = array_key_exists('event_title', $Camp_DB->config) ? $Camp_DB->con
   <body>
 <?php
 
-$command = '';
-if( array_key_exists('state', $_REQUEST)) {
-  $command = $_REQUEST['state'];
-}
-switch( $command ) {
+switch( CampUtils::arrayGet($_REQUEST, 'state',  '') ) {
   case 'logout':
     $err="You have successfully logged out. If you want to act further, please try again. <br />";
     foreach($_SESSION as $key=>$val) {unset($_SESSION[$key]);}
@@ -70,7 +66,7 @@ switch( $command ) {
 }
 
 if(!isset($_SESSION['openid'])) {
-  $event_details = array_key_exists('AboutTheEvent', $Camp_DB->config) ? $Camp_DB->config['AboutTheEvent'] : 'Event details go here.';
+  $event_details = CampUtils::arrayGet($Camp_DB->config, 'AboutTheEvent',  'Event details go here.');
   
   echo "<h1>Login to CampFireManager for $event_title</h1>";
   if(isset($err)) {echo '<div id="verify-form" class="error">'.$err.'</div>';}
@@ -108,13 +104,14 @@ if(!isset($_SESSION['openid'])) {
 } else {
   $dataSet = array(
     'OpenID'=> $_SESSION['openid'],
-    'OpenID_Name'=> array_key_exists('name', $_SESSION) ? $_SESSION['name'] : 'Unknown', // Check this
+    'OpenID_Name'=> CampUtils::arrayGet($_SESSION, 'name', 'Unknown'),
     'OpenID_Mail' => $_SESSION['email']
   );
   $Camp_DB->getMe($dataSet);
-  #$event_title = $Camp_DB->config['event_title']; // Check this
+
   echo "<h1 class=\"headerbar\">$event_title</h1>\r\n";
-  switch($_REQUEST['state']) {
+  $action = CampUtils::arrayGet($_REQUEST, 'state', '');
+  switch ( $action ) {
     case "O":
       $arrAuthString=$Camp_DB->getAuthStrings();
       $phones=$Camp_DB->getPhones();
@@ -148,7 +145,8 @@ if(!isset($_SESSION['openid'])) {
                 "<input type=\"hidden\" name=\"state\" value=\"Id\">\r\nYour name:\r\n" . 
                 "<div class=\"data_Name\"><span class=\"Label\">Name:</span> <span=\"Data\"><input type=\"text\" name=\"name\" value=\"{$details['strName']}\" /></span></div>";
       foreach($contact_fields as $proto) {
-        echo "\r\n<div class=\"data_$proto\"><span class=\"Label\">$proto:</span> <span=\"Data\"><input type=\"text\" name=\"$proto\" value=\"{$details[$proto]}\" /></span></div>";
+        $valueString = CampUtils::arrayGet($details, $proto, '');
+        echo "\r\n<div class=\"data_$proto\"><span class=\"Label\">$proto:</span> <span=\"Data\"><input type=\"text\" name=\"$proto\" value=\"$valueString\" /></span></div>";
       }
       echo "\r\n<input type=\"submit\" value=\"Go\"/> <a href=\"$baseurl\">Or, click here if you changed your mind.</a>\r\n</form>";
       break;

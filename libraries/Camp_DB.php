@@ -93,6 +93,7 @@ class Camp_DB extends GenericBaseClass {
   }
 
   function getMe($me=array(), $strSourceID='') {
+    $set = '';
     $this->doDebug("getMe(" . print_r($me, TRUE) . ", $strSourceID);");
 
     // Do we already have a personID?
@@ -171,11 +172,11 @@ class Camp_DB extends GenericBaseClass {
           }
         }
         // Now add it to the database
-        if($me['number']!='') {
+        if ( CampUtils::arrayGet($me, 'number', false) ) {
           $this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}people (strPhoneNumber, strName, strDefaultReply, strAuthString) VALUES ('{$me['number']}', '{$me['phone_nick']}', '{$me['phone']}', '$authString')");
-        } elseif($me['microblog_account']!='') {
+        } elseif( CampUtils::arrayGet($me, 'microblog_account', false) ) {
           $this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}people (strMicroBlog, strName, strAuthString, strDefaultReply) VALUES ('{$me['microblog_account']}', '{$me['microblog_name']}', '$authString', '{$me['strDefaultReply']}')");
-        } elseif($me['OpenID']!='') {
+        } elseif( CampUtils::arrayGet($me, 'OpenID', false) ) {
           $this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}people (strOpenID, strName, strContactInfo, strAuthString) VALUES ('{$me['OpenID']}', '{$me['OpenID_Name']}', '{$me['OpenID_Mail']}', '$authString')");
         } else {
           $this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}people (strName, strAuthString) VALUES ('Someone being supported by one of the crew', '$authString')");
@@ -184,7 +185,8 @@ class Camp_DB extends GenericBaseClass {
         $people=$this->qryMap('intPersonID', 'strName', "{$this->prefix}people WHERE strAuthString='$authString'");
         foreach($people as $intPersonID=>$strName) {}
         $this->intPersonID=$intPersonID;
-        $this->sendMessage("Welcome to {$this->config['event_title']}. Your authorization string for this system is: $authString.");
+        $event_title = CampUtils::arrayGet($this->config, 'event_title', 'CampFireDefaultEvent');
+        $this->sendMessage("Welcome to $event_title. Your authorization string for this system is: $authString.");
       }
       $checkIsAdmin=$this->qryMap('intPersonID', 'boolIsAdmin', "{$this->prefix}people WHERE intPersonID='$intPersonID'");
       $checkIsSupport=$this->qryMap('intPersonID', 'boolIsSupport', "{$this->prefix}people WHERE intPersonID='$intPersonID'");
@@ -950,11 +952,18 @@ class Camp_DB extends GenericBaseClass {
   }
 
   function _mergeContactDetails($arrContacts) {
+    $set = '';
     $this->doDebug("_mergeContactDetails(" . print_r($arrContacts, TRUE) . ")");
 
-    $me=$this->allMyDetails();
-    foreach($arrContacts as $intContactID=>$arrContact) {
-      if($contactID<$this->intPersonID) {$first=$arrContact; $second=$me;} else {$first=$me; $second=$arrContact;}
+    $me = $this->allMyDetails();
+    foreach($arrContacts as $intContactID => $arrContact) {
+      if($intContactID < $this->intPersonID) {
+        $first = $arrContact;
+        $second = $me;
+      } else {
+        $first = $me;
+        $second = $arrContact;
+      }
       $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}attendees SET intPersonID='{$first['intPersonID']}' WHERE intPersonID='{$second['intPersonID']}'");
       $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}sms_screen SET intPersonID='{$first['intPersonID']}' WHERE intPersonID='{$second['intPersonID']}'");
       $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}talks SET intPersonID='{$first['intPersonID']}' WHERE intPersonID='{$second['intPersonID']}'");
@@ -971,7 +980,9 @@ class Camp_DB extends GenericBaseClass {
       if($second['strOpenID']!='' AND $first['strOpenID']=='') {if($set!='') {$set.=', ';} $set.="strOpenID='{$second['strOpenID']}'";}
       if($second['strMicroBlog']!='' AND $first['strMicroBlog']=='') {if($set!='') {$set.=', ';} $set.="strMicroBlog='{$second['strMicroBlog']}'";}
       if($second['boolIsAdmin']!='0' AND $first['boolIsAdmin']==0) {if($set!='') {$set.=', ';} $set.="boolIsAdmin='{$second['boolIsAdmin']}'";}
-      if($set!='') {$this->boolUpdateOrInsertSql("UPDATE {$this->prefix}people SET $set WHERE intPersonID='{$first['intPersonID']}'");}
+      if($set != '') {
+        $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}people SET $set WHERE intPersonID='{$first['intPersonID']}'");
+      }
       $this->boolUpdateOrInsertSql("DELETE FROM {$this->prefix}people WHERE intPersonID='{$second['intPersonID']}'");
       $this->getMe(array("intPersonID"=>$first['intPersonID']));
       $this->refresh();
@@ -1012,7 +1023,7 @@ class Camp_DB extends GenericBaseClass {
 
     $this->doDebug("getTimetableTemplate($includeCountData, $includeProposeLink);");
 
-    session_start();
+    //session_start();
     if(isset($_SESSION['openid'])) {
       $dataSet = array(
         'OpenID'=>$_SESSION['openid'],
