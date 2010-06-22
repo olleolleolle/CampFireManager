@@ -54,7 +54,7 @@ class Camp_DB_Test extends Camp_DB {
     return(array('now'=>$now, 'next'=>$next));
   }
 
-  function getMe($me=array()) {
+  function getMe($me=array(), $strSourceID='') {
     $this->doDebug("getMe(" . print_r($me, TRUE) . ");");
     $this->intPersonID=1;
     $this->strName='Test User';
