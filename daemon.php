@@ -36,7 +36,7 @@ if(is_array($MBlog_Accounts) and count($MBlog_Accounts)>0) {
 }
 
 while(true) {
-  sleep(5);
+  sleep(2);
   if($Camp_DB->fixRooms()) {
     // fixRooms returns true if it fixed a room, thus, let's broadcast that.
     if(isset($Camp_DB->config['FixRoomOffset'])) {$offset=$Camp_DB->config['FixRoomOffset'];} else {$offset="-15 minutes";}
@@ -123,7 +123,7 @@ while(true) {
       // A [TalkID]  // R [TalkID]
       case "A ": // I will Attend a talk
       case "R ": // Remove me from a talk
-        for($i=0; $i<=count($commands); $i=$i+2) {
+        for($i=0; $i<=count($commands)-1; $i++) {
           switch(strtoupper($commands[$i])) {
             case "A":
               $Camp_DB->attendTalk($commands[$i+1]);
@@ -138,4 +138,3 @@ while(true) {
     }
   }
 }
-

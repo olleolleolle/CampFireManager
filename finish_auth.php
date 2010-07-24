@@ -3,28 +3,14 @@
 // This script derived from the libraries at http://openidenabled.com/php-openid/ and 
 // data from http://php.net/manual/en/reserved.variables.server.php
 
-require_once "Auth/common.php";
-session_start();
+require_once("Auth/common.php");
+require_once("libraries/common_functions.php");
+if(session_id()==='') {session_start();}
 $consumer = getConsumer();
 
 // Complete the authentication process using the server's response.
 $return_to = getReturnTo();
 $response = $consumer->complete($return_to);
-
-if($_SERVER['https'] == 1) {
-  $scheme="https";
-  if($_SERVER['SERVER_PORT']!=443) {$port=":" . $_SERVER['SERVER_PORT'];}
-} elseif ($_SERVER['https'] == 'on') {
-  $scheme="https";
-  if($_SERVER['SERVER_PORT']!=443) {$port=":" . $_SERVER['SERVER_PORT'];}
-} elseif ($_SERVER['SERVER_PORT']==443) {
-  $scheme="https";
-} else {
-  $scheme="http";
-  if($_SERVER['SERVER_PORT']!=80) {$port=":" . $_SERVER['SERVER_PORT'];}
-}
-
-$baseurl="$scheme://{$_SERVER['SERVER_NAME']}$port" . dirname($_SERVER['SCRIPT_NAME']);
 
 // Check the response status.
 if ($response->status == Auth_OpenID_CANCEL) {
@@ -45,4 +31,3 @@ if ($response->status == Auth_OpenID_CANCEL) {
   if (@$sreg['fullname']) {$_SESSION['full']=htmlentities($sreg['fullname']);}
   header("Location: $baseurl");
 }
-

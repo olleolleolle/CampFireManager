@@ -41,7 +41,7 @@ tr.entry {height:<?php echo $row_heights; ?>%;}
 .Label {font-size:9px;}
 .Right {text-align:right;}
 .Long {background-color:Silver;}
-.Time_title {background-color:Gray;}
+.Time_title {background-color:Silver;}
 .Next {background-color:LightBlue;}
 .Now {background-color:Yellow;}
 div#verify-form {padding: .5em; border: 1px solid #777777; background: #dddddd; margin-top: 1em; padding-bottom: 0em;}

@@ -29,14 +29,21 @@ $db_Phone=array(
 );
 
 //Load class files
-if(!isset($base_dir)) {if(file_exists("libraries/GenericBaseClass.php")) {$base_dir='libraries/';} else {$base_dir='';}}
+if(!isset($base_dir)) {
+  if(file_exists("libraries/GenericBaseClass.php")) {
+    $base_dir='libraries/';
+  } else {
+    $base_dir='';
+  }
+}
+
 require_once("{$base_dir}Camp_DB_Test.php");
 require_once("{$base_dir}SmsSource.php");
 require_once("{$base_dir}OmbSource.php");
+require_once("{$base_dir}CampUtils.php");
+
+if(!isset($debug)) {$debug=0;}
 
 //Initialize Class
-if( !isset($__campfire) || !is_array($__campfire) ) {
-  $__campfire = array();
-}
-
-$Camp_DB = new Camp_DB($db_CampFire['host'], $db_CampFire['user'], $db_CampFire['pass'], $db_CampFire['base'], $db_CampFire['prefix'], $__campfire, 0);
+if(!isset($__campfire) or !is_array($__campfire)) {$__campfire=array();}
+$Camp_DB=new Camp_DB($db_CampFire['host'], $db_CampFire['user'], $db_CampFire['pass'], $db_CampFire['base'], $db_CampFire['prefix'], $__campfire, $debug);

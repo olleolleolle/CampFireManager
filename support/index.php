@@ -11,11 +11,11 @@
  * http://code.google.com/p/campfiremanager/
  ******************************************************/
 
-session_start();
+if(session_id()==='') {session_start();}
 if(isset($_SESSION['redirect'])) {unset($_SESSION['redirect']);}
-$base_dir = "../libraries/";
-require_once "../db.php";
-require_once $base_dir . 'CampUtils.php';
+$base_dir="../libraries/";
+require_once("../db.php");
+require_once("{$base_dir}CampUtils.php");
 // Find the "Now" and "Next" time blocks
 $now_and_next=$Camp_DB->getNowAndNextTime();
 $now=$now_and_next['now'];
@@ -28,11 +28,7 @@ if(!isset($_SESSION['openid'])) {
   $_SESSION['redirect']='support';
   header("Location: ..");
 } else {
-  $dataSet = array(
-    'OpenID'=>$_SESSION['openid'],
-    'OpenID_Name'=>CampUtils::arrayGet($_SESSION, 'name', 'Unknown'),
-    'OpenID_Mail'=>$_SESSION['email']);
-  $Camp_DB->getMe($dataSet);
+  $Camp_DB->getMe(array('OpenID'=>$_SESSION['openid'], 'OpenID_Name'=>CampUtils::arrayGet($_SESSION, 'name', ''), 'OpenID_Mail'=>CampUtils::arrayGet($_SESSION, 'email', '')));
 }
 if($Camp_DB->getSupport()==0 AND $Camp_DB->getAdmins()==0) {
   header("Location: ../?state=Oa&AuthString={$Camp_DB->config['supportkey']}");
@@ -62,6 +58,16 @@ if($Camp_DB->getSupport()==0 AND $Camp_DB->getAdmins()==0) {
     $status=$Camp_DB->getPerson(array('strContactInfo'=>'%' . $_POST['contact'] . '%'));
   } elseif(isset($_POST['name']) AND $_POST['name']!='') {
     $status=$Camp_DB->getPerson(array('strName'=>'%' . $_POST['name'] . '%'));
+  } elseif(isset($_POST['edit']) AND $_POST['ntitle']!='' AND $_POST['talkid']!='') {
+    $Camp_DB->editTalk(array($_POST['talkid'], $Camp_DB->arrTalks[$_POST['talkid']]['intTimeID'], $Camp_DB->escape(htmlentities($_POST['ntitle']) . ' ')));
+  } elseif(isset($_POST['cancel']) AND $_POST['talkid']!='') {
+    $Camp_DB->cancelTalk(array($_POST['talkid'], $Camp_DB->arrTalks[$_POST['talkid']]['intTimeID'], $Camp_DB->escape(htmlentities($_POST['reason']))));
+  }
+  if(isset($_REQUEST['A'])) {
+    $Camp_DB->attendTalk($_REQUEST['A']);
+  }
+  if(isset($_REQUEST['D'])) {
+    $Camp_DB->declineTalk($_REQUEST['A']);
   }
   $auth_code = '';
   if(isset($_SESSION['support_user'])) {
@@ -81,6 +87,7 @@ if($Camp_DB->getSupport()==0 AND $Camp_DB->getAdmins()==0) {
     }
     echo "</table>";
   } elseif(!isset($_SESSION['support_user'])) {
+    if(!isset($auth_code)) {$auth_code='';}
     echo "<form method=\"post\" action=\"$baseurl\">AuthCode: <input name=\"authcode\" size=\"10\" value=\"$auth_code\" /><br />";
     echo "Person's Name: <input name=\"name\" size=\"20\" /> <br />";
     echo "Contact Detail: <input name=\"contact\" size=\"20\" /> <br />";
@@ -131,10 +138,10 @@ if($Camp_DB->getSupport()==0 AND $Camp_DB->getAdmins()==0) {
       $left=count($Camp_DB->times)-$now;
       for($l=1; $l<=$left; $l++) {echo "<option value=\"$l\">$l</option>";}
       echo "</select> \r\nslots. The talk will be about: \r\n<input type=\"text\" size=\"50\" name=\"title\" />\r\n<input type=\"submit\" name=\"update\" value=\"Go\"/></form>";
-    } elseif(isset($_REQUEST['edit'])) {
+    } elseif(isset($_GET['edit'])) {
       if(isset($_POST['update'])) {$Camp_DB->editTalk(array($_REQUEST['talkid'], $Camp_DB->arrTalks[$_REQUEST['talkid']]['intTimeID'], $Camp_DB->escape(htmlentities($_REQUEST['ntitle']) . ' ')));}
-      echo "<h2>Edit Talk</h2><form method=\"post\" action=\"$baseurl?edit\">\r\nRetitle a talk with a talk ID of: <input type=\"text\" size=\"2\" name=\"talkid\" value=\"{$_GET['edit']}\"/>\r\n With the new title <input type=\"text\" size=\"50\" name=\"ntitle\" value=\"{$Camp_DB->arrTalks[$_GET['edit']]['strTalkTitle']}\" />\r\n<input type=\"submit\" name=\"update\" value=\"Go\"/></form>";
-    } elseif(isset($_REQUEST['cancel'])) {
+      echo "<h2>Edit Talk</h2><form method=\"post\" action=\"$baseurl\"><input type=\"hidden\" name=\"edit\">Retitle a talk with a talk ID of: <input type=\"text\" size=\"2\" name=\"talkid\" value=\"{$_GET['edit']}\"/>\r\n With the new title <input type=\"text\" size=\"50\" name=\"ntitle\" value=\"{$Camp_DB->arrTalks[$_GET['edit']]['strTalkTitle']}\" />\r\n<input type=\"submit\" name=\"update\" value=\"Go\"/></form>";
+    } elseif(isset($_GET['cancel'])) {
       if(isset($_POST['update'])) {$Camp_DB->cancelTalk(array($_REQUEST['talkid'], $Camp_DB->arrTalks[$_REQUEST['talkid']]['intTimeID'], $Camp_DB->escape(htmlentities($_REQUEST['reason']))));}
       echo "<h2>Cancel Talk</h2><form method=\"post\" action=\"$baseurl\"><input type=\"hidden\" name=\"cancel\">Cancel a talk with a talk ID of: <input type=\"text\" size=\"2\" name=\"talkid\" value=\"{$_GET['cancel']}\" />\r\n Because <input type=\"text\" size=\"50\" name=\"reason\" />\r\n<input type=\"submit\" name=\"update\" value=\"Go\"/></form>";
     } elseif(isset($_GET['fix'])) {

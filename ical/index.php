@@ -42,7 +42,7 @@ if(count($Camp_DB->arrTalks)>0) {
                                          'hour'=>date("H", strtotime($Camp_DB->arrTimeEndPoints[$arrTalk['intTimeID'] + ($arrTalk['intLength'] - 1)]['e'])),
                                          'min'=>date("i", strtotime($Camp_DB->arrTimeEndPoints[$arrTalk['intTimeID'] + ($arrTalk['intLength'] - 1)]['e'])),
                                          'sec'=>'0'));
-      $vevent->setProperty('LOCATION',$Camp_DB->rooms[$arrTalk['intRoomID']]['strName']);
+      $vevent->setProperty('LOCATION',$Camp_DB->rooms[$Camp_DB->arrTalks[$intTalkID]['intRoomID']]['strRoom']);
       $vevent->setProperty('summary','"' . $arrTalk['strTalkTitle'] . '" by ' . $arrTalk['strPresenter']); 
       $vevent->setProperty("organiser",'CampFireManager'); 
       $vcal->setComponent ($vevent);

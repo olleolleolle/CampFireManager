@@ -11,7 +11,7 @@
  * http://code.google.com/p/campfiremanager/
  ******************************************************/
 
-session_start();
+if(session_id()==='') {session_start();}
 if(isset($_SESSION['redirect'])) {unset($_SESSION['redirect']);}
 if(!isset($_SESSION['openid']) and isset($_GET['login'])) {
   $_SESSION['redirect']='m';
@@ -19,6 +19,7 @@ if(!isset($_SESSION['openid']) and isset($_GET['login'])) {
 }
 $base_dir="../libraries/";
 require_once("../db.php");
+require_once("{$base_dir}CampUtils.php");
 ?><html>
 <head>
 <title>
@@ -27,8 +28,8 @@ require_once("../db.php");
 </head>
 <body>
 <?
-if(isset($_SESSION['openid'])) {$Camp_DB->getMe(array('OpenID'=>$_SESSION['openid'], 'OpenID_Name'=>$_SESSION['name'], 'OpenID_Mail'=>$_SESSION['email']));}
-switch($_REQUEST['state']) {
+if(isset($_SESSION['openid'])) {$Camp_DB->getMe(array('OpenID'=>$_SESSION['openid'], 'OpenID_Name'=>CampUtils::arrayGet($_SESSION, 'name', ''), 'OpenID_Mail'=>CampUtils::arrayGet($_SESSION, 'email', '')));}
+switch(CampUtils::arrayGet($_REQUEST, 'state', '')) {
   case "Id":
     $data=array();
     $data[]=$Camp_DB->escape(stripslashes($_REQUEST['name']));
