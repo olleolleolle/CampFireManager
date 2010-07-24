@@ -11,10 +11,9 @@
  * http://code.google.com/p/campfiremanager/
  ******************************************************/
 
-session_start();
+if(session_id()==='') {session_start();}
 if(isset($_SESSION['redirect'])) {unset($_SESSION['redirect']);}
 require_once("db.php");
-require_once 'libraries/CampUtils.php';
 if(!isset($Camp_DB->config['adminkey'])) {$Camp_DB->generateNewAdminKey();}
 if(!isset($Camp_DB->config['supportkey'])) {$Camp_DB->generateNewSupportKey();}
 // You're only allowed here if you've already logged in
@@ -24,8 +23,9 @@ if(!isset($_SESSION['openid'])) {
 } else {
   $dataSet = array(
     'OpenID'=>$_SESSION['openid'],
-    'OpenID_Name'=> CampUtils::arrayGet($_SESSION, 'name', 'Unknown'),
-    'OpenID_Mail'=>$_SESSION['email']);
+    'OpenID_Name'=>CampUtils::arrayGet($_SESSION, 'name', ''),
+    'OpenID_Mail'=>CampUtils::arrayGet($_SESSION, 'email', '')
+  );
   $Camp_DB->getMe($dataSet);
 }
 if($Camp_DB->getAdmins()==0) { // If there's no-one here yet, you get it by default!!
@@ -42,8 +42,7 @@ if($Camp_DB->getAdmins()==0) { // If there's no-one here yet, you get it by defa
 
   if(isset($_POST['update_config'])) {
     foreach($config_fields as $field=>$description) {
-      $val = CampUtils::arrayGet($_POST, $field, '');
-      $Camp_DB->setConfig($field, stripslashes($val) );
+      $Camp_DB->setConfig($field, stripslashes(CampUtils::arrayGet($_POST, $field, '')));
     }
   }
   if(isset($_POST['update_times'])) {
@@ -72,9 +71,7 @@ if($Camp_DB->getAdmins()==0) { // If there's no-one here yet, you get it by defa
   $arrPhones=$Camp_DB->getPhones();
   $arrMbs=$Camp_DB->getMicroBloggingAccounts();
   $Camp_DB->refresh();
-  
   $event_title =CampUtils::arrayGet($Camp_DB->config, 'event_title', 'CampfireDefaultEvent');
-  
   echo "<html>
 <head>
 <title>$event_title</title>
@@ -84,7 +81,7 @@ if($Camp_DB->getAdmins()==0) { // If there's no-one here yet, you get it by defa
 <form method=\"post\" action=\"{$baseurl}admin.php\" class=\"WholeDay\">
 <input type=\"hidden\" name=\"update_config\" value=\"TRUE\">
 <table>
-  <tr><td><a href=\"$baseurl\" class=\"Label\">Back to main screen</a></td><td class=\"right\"><a href=\"{$baseurl}joind_in.php\" class=\"Label\">Joind.in XML file</a></td></tr>
+  <tr><td><a href=\"$baseurl\" class=\"Label\">Back to main screen</a></td></tr>
   <tr><th colspan=\"2\">Admin Console for Config Options (empty boxes will unset those values in the database)</th></tr>
   <tr><td class=\"Label\">Next Admin Key (note: each use will change this value)</td><td class=\"Data\">{$Camp_DB->config['adminkey']}</td></tr>
   <tr><td class=\"Label\">Next Support Key (note: each use will change this value)</td><td class=\"Data\">{$Camp_DB->config['supportkey']}</td></tr>
@@ -106,7 +103,7 @@ if($Camp_DB->getAdmins()==0) { // If there's no-one here yet, you get it by defa
   }
   echo "<tr><td colspan=\"2\"><input type=\"submit\" value=\"Update Configuration\"></form>";
   echo "
-<tr><td><form method=\"post\" action=\"{$baseurl}admin.php\" class=\"WholeDay\">
+<tr><td><form method=\"post\" action=\"{$baseurl}admin.php#sms\" class=\"WholeDay\">
 <input type=\"hidden\" name=\"update_phones\" value=\"TRUE\">
 <table>
   <tr><th colspan=\"3\">SMS Devices (accessed by Gammu)</th></tr>
@@ -120,13 +117,13 @@ if($Camp_DB->getAdmins()==0) { // If there's no-one here yet, you get it by defa
   echo "
   <tr><th colspan=\"3\">New SMS Device</th></tr>
   <tr>
-    <td class=\"Data\"><input type=\"text\" name=\"phone_number_new\" size=\"15\" value=\"\"></td>
+    <td class=\"Data\"><a name=\"sms\"><input type=\"text\" name=\"phone_number_new\" size=\"15\" value=\"\"></td>
     <td class=\"Data\"><input type=\"text\" name=\"phone_network_new\" size=\"15\" value=\"\"></td>
     <td class=\"Data\"><input type=\"text\" name=\"phone_gammu_new\" size=\"15\" value=\"\"></td>
   </tr>";
   echo "<tr><td colspan=\"3\"><input type=\"submit\" value=\"Update Phones\">";
   echo "</table></form></td>
-<td><form method=\"post\" action=\"{$baseurl}admin.php\" class=\"WholeDay\">
+<td><form method=\"post\" action=\"{$baseurl}admin.php#mb\" class=\"WholeDay\">
 <input type=\"hidden\" name=\"update_microblogs\" value=\"TRUE\">
 <table>
   <tr><th colspan=\"3\">Microbloggging Accounts (via Twitter APIs)</th></tr>
@@ -140,13 +137,13 @@ if($Camp_DB->getAdmins()==0) { // If there's no-one here yet, you get it by defa
   echo "
   <tr><th colspan=\"4\">New Microblog</th></tr>
   <tr>
-    <td class=\"Data\"><input type=\"text\" name=\"mb_api_new\" size=\"15\" value=\"\"></td>
+    <td class=\"Data\"><a name=\"mb\"><input type=\"text\" name=\"mb_api_new\" size=\"15\" value=\"\"></td>
     <td class=\"Data\"><input type=\"text\" name=\"mb_user_new\" size=\"15\" value=\"\"></td>
     <td class=\"Data\"><input type=\"password\" name=\"mb_pass_new\" size=\"15\" value=\"\"></td>
   </tr>";
   echo "<tr><td colspan=\"4\"><input type=\"submit\" value=\"Update Microblogs\">";
   echo "</table></form></td>
-<tr><td><form method=\"post\" action=\"{$baseurl}admin.php\" class=\"WholeDay\">
+<tr><td><form method=\"post\" action=\"{$baseurl}admin.php#time\" class=\"WholeDay\">
 <input type=\"hidden\" name=\"update_times\" value=\"TRUE\">
 <table>
   <tr><th colspan=\"2\">Time Options (please sort these manually by time)</th></tr>
@@ -159,11 +156,11 @@ if($Camp_DB->getAdmins()==0) { // If there's no-one here yet, you get it by defa
   echo "
   <tr>
     <td class=\"Label\">New Time Slot</td>
-    <td class=\"Data\"><input type=\"text\" name=\"time_new\" size=\"10\" value=\"\"></td>
+    <td class=\"Data\"><a name=\"time\"><input type=\"text\" name=\"time_new\" size=\"10\" value=\"\"></td>
   </tr>";
   echo "<tr><td colspan=\"2\"><input type=\"submit\" value=\"Update Times\">";
   echo "</table></form></td>
-<td><form method=\"post\" action=\"{$baseurl}admin.php\" class=\"WholeDay\">
+<td><form method=\"post\" action=\"{$baseurl}admin.php#room\" class=\"WholeDay\">
 <input type=\"hidden\" name=\"update_rooms\" value=\"TRUE\">
 <table>
   <tr><th colspan=\"3\">Room Options (please sort these manually by capacity)</th></tr>
@@ -177,7 +174,7 @@ if($Camp_DB->getAdmins()==0) { // If there's no-one here yet, you get it by defa
   echo "
   <tr>
     <td class=\"Label\">New Room</td>
-    <td class=\"Data\"><input type=\"text\" name=\"room_new\" size=\"25\" value=\"\"></td>
+    <td class=\"Data\"><a name=\"room\"><input type=\"text\" name=\"room_new\" size=\"25\" value=\"\"></td>
     <td class=\"Data\"><input type=\"text\" name=\"capacity_new\" size=\"4\" value=\"\"></td>
   </tr>";
   echo "<tr><td colspan=\"3\"><input type=\"submit\" value=\"Update Configuration\">";
@@ -185,4 +182,3 @@ if($Camp_DB->getAdmins()==0) { // If there's no-one here yet, you get it by defa
 } else {
   header("Location: $baseurl");
 }
-
