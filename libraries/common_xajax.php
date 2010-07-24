@@ -43,7 +43,7 @@ function ajaxPopulateTable() {
   global $Camp_DB, $includeCountData, $includeProposeLink, $sms_limit, $baseurl;
   
   $return=new xajaxResponse();
-  session_start();
+  if(session_id()==='') {session_start();}
   if(isset($_SESSION['openid'])) {
     $counts=TRUE;
     $propose=FALSE;

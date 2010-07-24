@@ -14,22 +14,32 @@
 
 $baseurl=calculateBaseURL();
 function calculateBaseURL() {
-  $port = '';
-  $scheme = 'http';
-  if( array_key_exists('https', $_SERVER) && $_SERVER['https']  == 1) {
-    $scheme = "https";
-    if( $_SERVER['SERVER_PORT'] != 443) {
-        $port = ":" . $_SERVER['SERVER_PORT'];
+  $scheme='';
+  $port='';
+  if(isset($_SERVER['HTTPS']) and $_SERVER['HTTPS'] == 1) {
+    $scheme="https";
+    if(isset($_SERVER['SERVER_PORT']) and $_SERVER['SERVER_PORT']!=443) {
+      $port=":" . $_SERVER['SERVER_PORT'];
     }
-  } elseif (array_key_exists('https', $_SERVER) &&  $_SERVER['https'] == 'on') {
-    $scheme = "https";
-    if($_SERVER['SERVER_PORT']!=443) {$port=":" . $_SERVER['SERVER_PORT'];}
-  } elseif ($_SERVER['SERVER_PORT'] == 443) {
+  } elseif (isset($_SERVER['HTTPS']) and $_SERVER['HTTPS'] == 'on') {
+    $scheme="https";
+    if(isset($_SERVER['SERVER_PORT']) and $_SERVER['SERVER_PORT']!=443) {
+      $port=":" . $_SERVER['SERVER_PORT'];
+    }
+  } elseif (isset($_SERVER['SERVER_PORT']) and $_SERVER['SERVER_PORT']==443) {
     $scheme="https";
   } else {
-    if($_SERVER['SERVER_PORT']!=80) {$port=":" . $_SERVER['SERVER_PORT'];}
+    $scheme="http";
+    if(isset($_SERVER['SERVER_PORT']) and $_SERVER['SERVER_PORT']!=80) {
+      $port=":" . $_SERVER['SERVER_PORT'];
+    }
   }
-  return("$scheme://{$_SERVER['SERVER_NAME']}$port" . dirname($_SERVER['SCRIPT_NAME']) . "/");
+  if(isset($_SERVER['SERVER_NAME'])) {
+    if(substr(dirname($_SERVER['SCRIPT_NAME']), -1)!='/') {$append='/';} else {$append='';}
+    return("$scheme://{$_SERVER['SERVER_NAME']}$port" . dirname($_SERVER['SCRIPT_NAME']) . $append);
+  } else {
+    return("");
+  }
 }
 
 function genRandStr($minLen, $maxLen, $alphaLower = 1, $alphaUpper = 1, $num = 1, $batch = 1) {
@@ -55,7 +65,7 @@ function genRandStr($minLen, $maxLen, $alphaLower = 1, $alphaUpper = 1, $num = 1
       $strLen = rand($minLen, $maxLen);
     }
     $merged = array_merge($alphaLowerArray, $alphaUpperArray, $numArray);
-    
+
     if ($alphaLower == 1 && $alphaUpper == 1 && $num == 1) {
       $finalArray = array_merge($alphaLowerArray, $alphaUpperArray, $numArray);
     } elseif ($alphaLower == 1 && $alphaUpper == 1 && $num == 0) {
@@ -67,15 +77,15 @@ function genRandStr($minLen, $maxLen, $alphaLower = 1, $alphaUpper = 1, $num = 1
     } elseif ($alphaLower == 1 && $alphaUpper == 0 && $num == 0) {
       $finalArray = $alphaLowerArray;
     } elseif ($alphaLower == 0 && $alphaUpper == 1 && $num == 0) {
-      $finalArray = $alphaUpperArray;                       
+      $finalArray = $alphaUpperArray;
     } elseif ($alphaLower == 0 && $alphaUpper == 0 && $num == 1) {
       $finalArray = $numArray;
     } else {
       return FALSE;
     }
-    
+
     $count = count($finalArray);
-    
+
     if ($batch == 1) {
       $str = '';
       $i = 1;

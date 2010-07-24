@@ -12,6 +12,7 @@
  ******************************************************/
 
 require_once($base_dir . "GenericBaseClass.php");
+require_once($base_dir . "CampUtils.php");
 
 class Camp_DB extends GenericBaseClass {
   // Cached data
@@ -234,7 +235,7 @@ class Camp_DB extends GenericBaseClass {
       $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}talks SET boolFixed=1 WHERE intTalkID='$intTalkID'");
     } else {
       $this->doDebug("Talk $intTalkID is unfixed", 2);
-      $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}talks SET boolFixed= WHERE intTalkID='$intTalkID'");
+      $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}talks SET boolFixed=0 WHERE intTalkID='$intTalkID'");
     }
     $this->refresh();
   }
@@ -297,11 +298,10 @@ class Camp_DB extends GenericBaseClass {
     if(!isset($this->rooms[$intRoomID]) AND $strRoom!='' AND $intCapacity!='') {
       $this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}rooms (strRoom, intCapacity) VALUES ('$strRoom', '$intCapacity')");
     }
-    
-    if($this->rooms[$intRoomID]['strRoom']!=$strRoom AND $strRoom!='' AND $this->rooms[$intRoomID]['intRoom']!=$intCapacity AND $intCapacity!='') {
+    if($this->rooms[$intRoomID]['strRoom']!=$strRoom AND $strRoom!='' AND $this->rooms[$intRoomID]['intRoomID']!=$intCapacity AND $intCapacity!='') {
       $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}rooms SET strRoom='$strRoom', intCapacity='$intCapacity' WHERE intRoomID='$intRoomID'");
     }
-    if(($this->rooms[$intRoomID]['strRoom']!=$strRoom AND $strRoom=='') OR ($this->rooms[$intRoomID]['intRoom']!=$intCapacity AND $intCapacity=='')) {
+    if(($this->rooms[$intRoomID]['strRoom']!=$strRoom AND $strRoom=='') OR ($this->rooms[$intRoomID]['intRoomID']!=$intCapacity AND $intCapacity=='')) {
       $this->boolUpdateOrInsertSql("TRUNCATE {$this->prefix}rooms");
       foreach($this->rooms as $old_intRoomID=>$arrRoom) {
         if($old_intRoomID!=$intRoomID) {$this->boolUpdateOrInsertSql("INSERT INTO {$this->prefix}rooms (strRoom, intCapacity) VALUES ('" . $arrRoom['strRoom'] . "', '" . $arrRoom['intCapacity'] . "')");}
@@ -562,6 +562,7 @@ class Camp_DB extends GenericBaseClass {
   }
 
   function showStatusScreen($number=50) {
+    $where='';
     if($this->intPersonID!='') {$where="intPersonID='{$this->intPersonID}' AND ";} 
     return $this->qryMap('intUpdateID', 'strMessage', "{$this->prefix}sms_screen WHERE $where datInsert>'" . date("Y-m-d H:i:s", strtotime("-15 minutes")) . "' ORDER BY datInsert DESC", '',  "LIMIT 0, $number");
   }
@@ -945,13 +946,21 @@ class Camp_DB extends GenericBaseClass {
   protected function _setAdmin() {
     $this->doDebug("_setAdmin()");
     $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}people SET boolIsAdmin=1 WHERE intPersonID='{$this->intPersonID}'");
-    $this->generateNewAdminKey($this->resource);
+    $this->generateNewAdminKey();
+  }
+
+  protected function _setSupport() {
+    $this->doDebug("_setSupport()");
+    $this->boolUpdateOrInsertSql("UPDATE {$this->prefix}people SET boolIsSupport=1 WHERE intPersonID='{$this->intPersonID}'");
+    $this->generateNewSupportKey();
   }
 
   function mergeContactDetails($strAuthString) {
     $strAuthString=$this->escape($strAuthString);
     if($this->config['adminkey']==$strAuthString) {
       $this->_setAdmin();
+    } elseif($this->config['supportkey']==$strAuthString) {
+      $this->_setSupport();
     } else {
       $contacts=$this->getPerson(array('strAuthString'=>$strAuthString));
       if(count($contacts)==1) {$this->_mergeContactDetails($contacts);}
@@ -1037,15 +1046,8 @@ class Camp_DB extends GenericBaseClass {
 
     $this->doDebug("getTimetableTemplate($includeCountData, $includeProposeLink);");
 
-    //session_start();
-    if(isset($_SESSION['openid'])) {
-      $dataSet = array(
-        'OpenID'=>$_SESSION['openid'],
-        'OpenID_Name'=> array_key_exists('name', $_SESSION) ? $_SESSION['name'] : 'Unknown', // Check this
-        'OpenID_Mail'=>$_SESSION['email']
-      );
-      $this->getMe($dataSet);
-    }
+    if(session_id()==='') {session_start();}
+    if(isset($_SESSION['openid'])) {$this->getMe(array('OpenID'=>$_SESSION['openid'], 'OpenID_Name'=>CampUtils::arrayGet($_SESSION, 'name', ''), 'OpenID_Mail'=>CampUtils::arrayGet($_SESSION, 'email', '')));}
 
     // Get the talks this person is presenting
     $my_talks=$this->getMyTalks();
