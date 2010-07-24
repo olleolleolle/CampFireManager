@@ -957,6 +957,10 @@ class Auth_OpenID_GenericConsumer {
             }
 
             if (!$assoc->checkMessageSignature($message)) {
+                // If we get a "bad signature" here, it means that the association
+                // is unrecoverabley corrupted in some way. Any futher attempts
+                // to login with this association is likely to fail. Drop it.
+                $this->store->removeAssociation($server_url, $assoc_handle);
                 return new Auth_OpenID_FailureResponse(null,
                                                        "Bad signature");
             }
