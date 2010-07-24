@@ -1,8 +1,9 @@
 <?php
 
 // This script derived from the libraries at http://openidenabled.com/php-openid/
+
 require_once "Auth/common.php";
-session_start();
+if(session_id()==='') {session_start();}
 
 function getOpenIDURL() {
     // Render a default page if we got a submission without an openid
@@ -12,6 +13,7 @@ function getOpenIDURL() {
         include 'index.php';
         exit(0);
     }
+
     return $_GET['openid_identifier'];
 }
 
@@ -37,7 +39,10 @@ function run() {
         $auth_request->addExtension($sreg_request);
     }
 
-    $policy_uris = array_key_exists('policies', $_GET) ? $_GET['policies'] : array();
+    $policy_uris = '';
+    if(isset($_GET['policies'])) {
+      $policy_uris = $_GET['policies'];
+    }
 
     $pape_request = new Auth_OpenID_PAPE_Request($policy_uris);
     if ($pape_request) {
@@ -77,4 +82,5 @@ function run() {
         }
     }
 }
+
 run();
